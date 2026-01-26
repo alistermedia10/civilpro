@@ -1,7 +1,7 @@
 {
-  "name": "CivilPro - Aplikasi Sipil",
-  "short_name": "CivilPro",
-  "description": "Aplikasi Kalkulator Sipil Terpadu (Denah, RAB, Listrik, Pondasi)",
+  "name": "Alister Engineering - Aplikasi Sipil",
+  "short_name": "Alister Enginering",
+  "description": "Aplikasi Kalkulator Sipil Terpadu",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f1f5f9",
