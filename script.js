@@ -5,33 +5,32 @@ function parseRupiah(str) {
     return parseInt(str.replace(/[^0-9]/g, '')) || 0;
 }
 
-// --- 2. NAVIGATION LOGIC (INCLUDING BOTTOM NAV) ---
+// --- 2. NAVIGATION LOGIC ---
 function switchTab(tabId) {
     // Hide all tabs
     document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-    
     // Show target tab
     const target = document.getElementById(tabId);
     if(target) target.classList.add('active');
     
     // --- UPDATE BOTTOM NAV STYLES ---
     document.querySelectorAll('.nav-btn-bottom').forEach(btn => {
-        // Reset style (Default: Slate gray)
+        // Reset style
         btn.classList.remove('text-blue-600', 'font-bold');
         btn.classList.add('text-slate-400');
         
-        // Set active style (Blue + Bold) if button onclick contains tabId
+        // Set active style
         if(btn.onclick.toString().includes(tabId)) {
             btn.classList.remove('text-slate-400');
             btn.classList.add('text-blue-600', 'font-bold');
         }
     });
 
-    // Refresh Canvas jika perlu (fix render issue saat pindah tab)
+    // Refresh canvas if needed
     if(tabId === 'denah') drawDenah();
     if(tabId === 'pondasi') drawPondasi();
     
-    // Load Blog jika tab blog dibuka
+    // Load blog if switched to blog tab
     if(tabId === 'blog') loadBlog();
 }
 
@@ -49,7 +48,7 @@ async function loadBlog() {
     errorEl.classList.add('hidden');
 
     try {
-        // Fetch Feed JSON dari Blogger
+        // Mengambil Feed JSON dari Blogger
         const response = await fetch('https://alister10.blogspot.com/feeds/posts/default?alt=json&max-results=6');
         
         if (!response.ok) throw new Error('Gagal mengambil data');
@@ -59,16 +58,11 @@ async function loadBlog() {
 
         if (!posts || posts.length === 0) {
             containerEl.innerHTML = '<p class="text-center text-slate-500">Belum ada artikel.</p>';
-            containerEl.classList.remove('hidden');
         } else {
             containerEl.innerHTML = posts.map(post => {
-                // Ambil Judul
                 const title = post.title.$t;
-                // Ambil Link
                 const link = post.link.find(l => l.rel === 'alternate').href;
-                // Ambil Tanggal
                 const date = new Date(post.published.$t).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
-                // Ambil Konten & Bersihkan HTML
                 let content = post.content.$t;
                 const plainText = content.replace(/<[^>]*>?/gm, '').substring(0, 120) + '...';
 
@@ -83,10 +77,10 @@ async function loadBlog() {
                     </article>
                 `;
             }).join('');
-            containerEl.classList.remove('hidden');
         }
 
         loadingEl.classList.add('hidden');
+        containerEl.classList.remove('hidden');
 
     } catch (error) {
         console.error('Blog Error:', error);
@@ -239,7 +233,6 @@ function clearRooms() {
         drawDenah();
     }
 }
-
 function delRoom(idx) {
     rooms.splice(idx,1);
     localStorage.setItem('civilPro_rooms', JSON.stringify(rooms));
@@ -314,27 +307,26 @@ function hitungBangunan() {
     const t = elTinggi ? parseFloat(elTinggi.value) : 0;
     const luasPlat = elLuasPlat ? parseFloat(elLuasPlat.value) : 0;
 
-    // Estimasi Sederhana
     const luasLantai = p * l;
     const keliling = 2 * (p + l);
     const luasDinding = keliling * t;
     
     // 1. Struktur
-    const volBeton = luasPlat * 0.12; // asumsi tebal 12cm
-    const besi = volBeton * 100; // asumsi 100kg/m3
+    const volBeton = luasPlat * 0.12; 
+    const besi = volBeton * 100; 
     const biayaBeton = volBeton * hBeton;
     const biayaBesi = besi * hBesi;
     const totalStruktur = biayaBeton + biayaBesi;
 
     // 2. Dinding (Rough Est)
-    const volDinding = luasDinding * 0.15; // tebal 15cm
-    const semenD = volDinding * 6; // 6 sak/m3
-    const pasirD = volDinding * 0.8; // 0.8 m3/m3
+    const volDinding = luasDinding * 0.15; 
+    const semenD = volDinding * 6; 
+    const pasirD = volDinding * 0.8; 
     const totalDinding = (semenD * hSemen) + (pasirD * hPasir);
 
     // 3. Finishing
     const biayaKeramik = luasLantai * hKeramik;
-    const biayaCat = (luasDinding * 2 + luasLantai) * hCat; // 2 sisi dinding + plafon
+    const biayaCat = (luasDinding * 2 + luasLantai) * hCat; 
     const totalFinishing = biayaKeramik + biayaCat;
 
     const grandTotal = totalStruktur + totalDinding + totalFinishing;
@@ -396,10 +388,9 @@ function hitungPondasi() {
     const hSemen = parseFloat(document.getElementById('hp-semen').value);
 
     const vol = ((la + lb) / 2) * t * p;
-    const volBatu = vol * 0.7; // 70% batu
-    const volSpesi = vol * 0.3; // 30% spesi
+    const volBatu = vol * 0.7; 
+    const volSpesi = vol * 0.3; 
     
-    // Asumsi 1 sak semen = 0.024 m3 mortar
     const sakSemen = Math.ceil(volSpesi / 0.024);
 
     const biaya = (volBatu * hBatu) + (sakSemen * hSemen);
@@ -417,7 +408,7 @@ function hitungPondasi() {
     updateDashboard();
 }
 
-// --- 9. AGGREGATOR & INIT ---
+// --- 9. AGGREGATOR ---
 function updateDashboard() {
     // Get Elec Total
     const elecTotal = elecRows.reduce((acc, r) => acc + (r.qty * r.price), 0);
@@ -425,7 +416,7 @@ function updateDashboard() {
     // Get Denah Total
     const denahTotal = rooms.reduce((acc, r) => acc + (r.p * r.l * r.cost), 0);
 
-    // Get Building Total (Grab from DOM text)
+    // Get Building Total
     const bText = document.getElementById('res-total-bangunan') ? document.getElementById('res-total-bangunan').innerText : "Rp 0";
     const bTotal = parseRupiah(bText);
 
@@ -444,7 +435,6 @@ function updateDashboard() {
 
 // --- 10. PWA SERVICE WORKER REGISTRATION ---
 window.addEventListener('load', () => {
-    // 1. Register Service Worker
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('./sw.js')
             .then((registration) => {
@@ -452,13 +442,12 @@ window.addEventListener('load', () => {
             })
             .catch((error) => {
                 console.error('❌ Service Worker Gagal:', error);
-                // Tidak alert user agar UX lebih baik, cukup cek console
             });
     } else {
         console.warn('⚠️ Browser ini tidak mendukung Service Worker.');
     }
 
-    // 2. Init App Logic
+    // --- INIT APP LOGIC ---
     switchTab('dashboard');
     renderChecklist();
     drawDenah();
