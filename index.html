@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CivilPro - Aplikasi Sipil Terpadu</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #475569;
+            --accent: #f59e0b;
+        }
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; -webkit-tap-highlight-color: transparent; }
+        
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .no-scrollbar { -ms-overflow-style: none;  scrollbar-width: none; }
+
+        /* Smooth fade transition */
+        .tab-content { display: none; animation: fadeIn 0.3s ease-in-out; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Print Styles */
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; }
+            .tab-content { display: block !important; page-break-after: always; }
+            .tab-content:last-child { page-break-after: auto; }
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <!-- HEADER -->
+    <header class="bg-white shadow-md sticky top-0 z-50 no-print">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="bg-blue-600 text-white p-2 rounded-lg font-bold">CP</div>
+                <div>
+                    <h1 class="text-lg font-bold text-slate-800 leading-none">CivilPro</h1>
+                    <span class="text-xs text-slate-500">Aplikasi Sipil Terpadu</span>
+                </div>
+            </div>
+            <button onclick="window.print()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-2 rounded-lg text-sm font-medium transition">
+                🖨️ Cetak
+            </button>
+        </div>
+
+        <!-- MENU GESER (SCROLLABLE NAV) -->
+        <nav class="border-t border-slate-200 bg-white/95 backdrop-blur">
+            <div class="max-w-7xl mx-auto overflow-x-auto no-scrollbar">
+                <div class="flex space-x-1 px-2 py-2 min-w-max">
+                    <button onclick="switchTab('dashboard')" class="nav-btn active px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all">📊 Dashboard</button>
+                    <button onclick="switchTab('denah')" class="nav-btn px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all">📐 Denah & Biaya</button>
+                    <button onclick="switchTab('listrik')" class="nav-btn px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all">⚡ Instalasi Listrik</button>
+                    <button onclick="switchTab('bangunan')" class="nav-btn px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all">🏗️ RAB Bangunan</button>
+                    <button onclick="switchTab('pondasi')" class="nav-btn px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all">🪨 RAB Pondasi Visual</button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="max-w-7xl mx-auto p-4 pb-20 space-y-6">
+
+        <!-- 1. DASHBOARD & CHECKLIST -->
+        <section id="dashboard" class="tab-content active">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                    <p class="text-sm text-slate-500 font-medium">Total Biaya RAB</p>
+                    <h2 class="text-2xl font-bold text-blue-600 mt-1" id="dash-total">Rp 0</h2>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                    <p class="text-sm text-slate-500 font-medium">Progress Pekerjaan</p>
+                    <h2 class="text-2xl font-bold text-green-600 mt-1" id="dash-progress">0%</h2>
+                    <div class="w-full bg-slate-100 rounded-full h-2 mt-3">
+                        <div class="bg-green-500 h-2 rounded-full" style="width: 0%" id="dash-progress-bar"></div>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                    <p class="text-sm text-slate-500 font-medium">Item Material</p>
+                    <h2 class="text-2xl font-bold text-orange-500 mt-1" id="dash-items">0</h2>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-slate-100">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-lg">Checklist Proyek</h3>
+                    <button onclick="resetChecklist()" class="text-xs text-red-500 hover:underline">Reset Checklist</button>
+                </div>
+                <div id="checklist-container" class="space-y-2">
+                    <!-- JS generated -->
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. DENAH RUMAH -->
+        <section id="denah" class="tab-content">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 space-y-4">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                        <h3 class="font-bold text-lg mb-4">Input Ruangan</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <input type="text" id="room-name" placeholder="Nama Ruang" class="border p-2 rounded-lg w-full text-sm">
+                            <input type="number" id="room-p" placeholder="Panjang (m)" class="border p-2 rounded-lg w-full text-sm">
+                            <input type="number" id="room-l" placeholder="Lebar (m)" class="border p-2 rounded-lg w-full text-sm">
+                            <input type="number" id="room-cost" placeholder="Biaya /m²" class="border p-2 rounded-lg w-full text-sm" value="3500000">
+                        </div>
+                        <div class="mt-3 flex gap-2">
+                            <button onclick="addRoom()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700">➕ Tambah</button>
+                            <button onclick="clearRooms()" class="bg-slate-200 text-slate-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-300">Reset Denah</button>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
+                        <h3 class="font-bold mb-2">Visual Denah</h3>
+                        <div class="border border-dashed border-slate-300 bg-slate-50 rounded-lg flex justify-center items-center overflow-auto h-[300px]">
+                            <canvas id="blueprintCanvas" width="600" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="bg-blue-50 p-6 rounded-xl border border-blue-100">
+                        <h3 class="font-bold text-blue-800 mb-2">Rangkuman Denah</h3>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between"><span>Total Luas:</span> <span class="font-bold" id="denah-luas">0 m²</span></div>
+                            <div class="flex justify-between"><span>Total Biaya:</span> <span class="font-bold text-blue-700" id="denah-biaya">Rp 0</span></div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 max-h-[250px] overflow-y-auto">
+                        <h3 class="font-bold text-sm mb-2">Daftar Ruangan</h3>
+                        <ul id="room-list" class="text-sm space-y-1"></ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. INSTALASI LISTRIK -->
+        <section id="listrik" class="tab-content">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 mb-6">
+                <h3 class="font-bold text-lg mb-4">📋 RAB Instalasi Listrik</h3>
+                <!-- Simple Table Input for Electricity -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left">
+                        <thead class="text-xs text-slate-500 uppercase bg-slate-50">
+                            <tr>
+                                <th class="px-4 py-3">Item Material</th>
+                                <th class="px-4 py-3 w-24">Jumlah</th>
+                                <th class="px-4 py-3 w-32">Harga Satuan</th>
+                                <th class="px-4 py-3 w-32">Total</th>
+                                <th class="px-4 py-3 w-10"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="elec-table-body">
+                            <!-- Default Rows -->
+                        </tbody>
+                    </table>
+                </div>
+                <button onclick="addElecRow()" class="mt-4 text-blue-600 text-sm font-medium hover:underline">+ Tambah Baris</button>
+                <div class="mt-4 pt-4 border-t flex justify-end">
+                    <span class="text-lg font-bold">Total: <span id="elec-total" class="text-blue-600">Rp 0</span></span>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. RAB BANGUNAN -->
+        <section id="bangunan" class="tab-content">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Inputs -->
+                <div class="space-y-4">
+                    <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-100">
+                        <h4 class="font-bold text-slate-700 mb-3 border-b pb-2">1. Dimensi & Struktur</h4>
+                        <div class="grid grid-cols-2 gap-3 text-sm">
+                            <label class="block">Panjang (m)<input type="number" id="b-panjang" class="w-full border p-2 rounded mt-1" value="10"></label>
+                            <label class="block">Lebar (m)<input type="number" id="b-lebar" class="w-full border p-2 rounded mt-1" value="8"></label>
+                            <label class="block">Tinggi Dinding (m)<input type="number" id="b-tinggi" class="w-full border p-2 rounded mt-1" value="3"></label>
+                            <label class="block">Luas Plat Beton (m²)<input type="number" id="b-luas-plat" class="w-full border p-2 rounded mt-1" value="0"></label>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-100">
+                        <h4 class="font-bold text-slate-700 mb-3 border-b pb-2">2. Harga Material</h4>
+                        <div class="grid grid-cols-2 gap-3 text-sm">
+                            <label class="block">Beton /m³ <input type="number" id="h-beton" class="w-full border p-2 rounded mt-1" value="900000"></label>
+                            <label class="block">Besi /kg <input type="number" id="h-besi" class="w-full border p-2 rounded mt-1" value="15000"></label>
+                            <label class="block">Semen /sak <input type="number" id="h-semen" class="w-full border p-2 rounded mt-1" value="65000"></label>
+                            <label class="block">Pasir /m³ <input type="number" id="h-pasir" class="w-full border p-2 rounded mt-1" value="350000"></label>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-100">
+                        <h4 class="font-bold text-slate-700 mb-3 border-b pb-2">3. Finishing</h4>
+                        <div class="grid grid-cols-2 gap-3 text-sm">
+                            <label class="block">Keramik (Rp/m²)<input type="number" id="h-keramik" class="w-full border p-2 rounded mt-1" value="150000"></label>
+                            <label class="block">Cat (Rp/m²)<input type="number" id="h-cat" class="w-full border p-2 rounded mt-1" value="45000"></label>
+                        </div>
+                    </div>
+
+                    <button onclick="hitungBangunan()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold shadow hover:bg-blue-700 transition">Hitung RAB Bangunan</button>
+                </div>
+
+                <!-- Results -->
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-100">
+                    <h3 class="font-bold text-lg mb-4">Hasil Perhitungan</h3>
+                    <div class="space-y-4 text-sm">
+                        <div class="flex justify-between border-b pb-2">
+                            <span>Struktur (Beton + Besi)</span>
+                            <span class="font-bold" id="res-struktur">-</span>
+                        </div>
+                        <div class="flex justify-between border-b pb-2">
+                            <span>Dinding & Pondasi (Estimasi)</span>
+                            <span class="font-bold" id="res-dinding">-</span>
+                        </div>
+                        <div class="flex justify-between border-b pb-2">
+                            <span>Finishing (Lantai + Cat)</span>
+                            <span class="font-bold" id="res-finishing">-</span>
+                        </div>
+                        <div class="flex justify-between pt-2 text-base">
+                            <span class="font-bold text-blue-800">Total Bangunan</span>
+                            <span class="font-bold text-blue-800 text-xl" id="res-total-bangunan">Rp 0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. RAB PONDASI VISUAL -->
+        <section id="pondasi" class="tab-content">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Input -->
+                <div class="space-y-4">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                        <h3 class="font-bold text-lg mb-4">Data Pondasi</h3>
+                        <div class="grid grid-cols-3 gap-3 mb-4">
+                            <div>
+                                <label class="text-xs text-slate-500">L Atas (cm)</label>
+                                <input type="number" id="p-la" class="w-full border p-2 rounded" value="30">
+                            </div>
+                            <div>
+                                <label class="text-xs text-slate-500">L Bawah (cm)</label>
+                                <input type="number" id="p-lb" class="w-full border p-2 rounded" value="60">
+                            </div>
+                            <div>
+                                <label class="text-xs text-slate-500">Tinggi (cm)</label>
+                                <input type="number" id="p-t" class="w-full border p-2 rounded" value="70">
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="text-xs text-slate-500">Panjang Pondasi (m)</label>
+                            <input type="number" id="p-p" class="w-full border p-2 rounded" value="50">
+                        </div>
+                        <div class="flex gap-2 items-center mb-4 bg-yellow-50 p-2 rounded">
+                            <input type="checkbox" id="p-aan" class="w-4 h-4" checked onchange="drawPondasi()">
+                            <label class="text-sm">Pakai Aanstamping</label>
+                        </div>
+                        <button onclick="hitungPondasi()" class="w-full bg-orange-500 text-white py-3 rounded-xl font-bold hover:bg-orange-600">Hitung RAB Pondasi</button>
+                    </div>
+
+                    <div class="bg-slate-800 text-white p-4 rounded-xl text-sm">
+                        <h4 class="font-bold mb-2">Info Harga</h4>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>Batu: Rp <input type="number" id="hp-batu" value="250000" class="w-20 bg-transparent border-b border-slate-500 text-right text-xs"></div>
+                            <div>Semen: Rp <input type="number" id="hp-semen" value="65000" class="w-20 bg-transparent border-b border-slate-500 text-right text-xs"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visual & Result -->
+                <div class="space-y-4">
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex justify-center items-center min-h-[200px]">
+                        <div id="pondasi-svg-container"></div>
+                    </div>
+                    <div class="bg-orange-50 p-4 rounded-xl border border-orange-100">
+                        <div class="flex justify-between mb-2"><span>Volume Pondasi:</span> <span class="font-bold" id="res-vol">-</span></div>
+                        <div class="flex justify-between mb-2"><span>Kebutuhan Batu:</span> <span class="font-bold" id="res-batu">-</span></div>
+                        <div class="flex justify-between mb-2"><span>Kebutuhan Semen:</span> <span class="font-bold" id="res-semen">-</span></div>
+                        <div class="flex justify-between pt-2 border-t mt-2 text-lg font-bold text-orange-800">
+                            <span>Total Biaya</span>
+                            <span id="res-total-pondasi">Rp 0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // --- GLOBAL VARIABLES & INIT ---
+        const formatRupiah = (num) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
+
+        // --- NAVIGATION ---
+        function switchTab(tabId) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            // Show target tab
+            document.getElementById(tabId).classList.add('active');
+            
+            // Update Nav Button Styles
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-blue-600', 'text-white', 'shadow-md');
+                btn.classList.add('bg-slate-100', 'text-slate-600');
+                if(btn.onclick.toString().includes(tabId)) {
+                    btn.classList.remove('bg-slate-100', 'text-slate-600');
+                    btn.classList.add('bg-blue-600', 'text-white', 'shadow-md');
+                }
+            });
+        }
+
+        // --- 1. DASHBOARD ---
+        const defaultTasks = ["Survei Lokasi", "Pembersihan Lahan", "Galian Pondasi", "Pasang Pondasi", "Pasang Sloof/Kolom", "Pasang Dinding", "Rangka Atap", "Plat Lantai", "Kusen & Pintu", "Instalasi Listrik", "Instalasi Air", "Plester & Aci", "Cat & Finishing"];
+        let tasks = JSON.parse(localStorage.getItem('civilPro_tasks')) || defaultTasks.map(t => ({name: t, done: false}));
+
+        function renderChecklist() {
+            const container = document.getElementById('checklist-container');
+            container.innerHTML = tasks.map((t, i) => `
+                <div class="flex items-center p-3 bg-slate-50 rounded-lg border border-slate-100 cursor-pointer hover:bg-slate-100 transition" onclick="toggleTask(${i})">
+                    <div class="w-5 h-5 rounded border ${t.done ? 'bg-green-500 border-green-500' : 'border-slate-300'} flex items-center justify-center mr-3 text-white text-xs">
+                        ${t.done ? '✓' : ''}
+                    </div>
+                    <span class="${t.done ? 'line-through text-slate-400' : 'text-slate-700'}">${t.name}</span>
+                </div>
+            `).join('');
+            updateProgress();
+            localStorage.setItem('civilPro_tasks', JSON.stringify(tasks));
+        }
+
+        function toggleTask(idx) {
+            tasks[idx].done = !tasks[idx].done;
+            renderChecklist();
+        }
+
+        function resetChecklist() {
+            if(confirm('Reset checklist proyek?')) {
+                tasks = defaultTasks.map(t => ({name: t, done: false}));
+                renderChecklist();
+            }
+        }
+
+        function updateProgress() {
+            const done = tasks.filter(t => t.done).length;
+            const pct = Math.round((done / tasks.length) * 100);
+            document.getElementById('dash-progress').innerText = pct + '%';
+            document.getElementById('dash-progress-bar').style.width = pct + '%';
+        }
+
+        // --- 2. DENAH ---
+        let rooms = JSON.parse(localStorage.getItem('civilPro_rooms')) || [];
+        const canvas = document.getElementById('blueprintCanvas');
+        const ctx = canvas.getContext('2d');
+        const SCALE = 20; // 1m = 20px
+
+        function drawDenah() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // Grid
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 1;
+            for(let i=0; i<canvas.width; i+=SCALE) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,canvas.height); ctx.stroke(); }
+            for(let i=0; i<canvas.height; i+=SCALE) { ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(canvas.width,i); ctx.stroke(); }
+
+            let totalLuas = 0;
+            let totalBiaya = 0;
+            const list = document.getElementById('room-list');
+            list.innerHTML = '';
+            
+            let curX = 20, curY = 20, maxY = 0;
+
+            rooms.forEach((r, i) => {
+                const w = r.p * SCALE;
+                const h = r.l * SCALE;
+                const luas = r.p * r.l;
+                const biaya = luas * r.cost;
+
+                totalLuas += luas;
+                totalBiaya += biaya;
+
+                // Draw
+                ctx.fillStyle = i % 2 === 0 ? '#bfdbfe' : '#ddd6fe';
+                ctx.fillRect(curX, curY, w, h);
+                ctx.strokeStyle = '#334155';
+                ctx.strokeRect(curX, curY, w, h);
+                ctx.fillStyle = '#0f172a';
+                ctx.font = '10px sans-serif';
+                ctx.fillText(r.name, curX + 5, curY + 15);
+                ctx.fillText(`${r.p}x${r.l}`, curX + 5, curY + 28);
+
+                // Add to list
+                const li = document.createElement('li');
+                li.className = "flex justify-between border-b border-slate-100 py-1";
+                li.innerHTML = `<span>${r.name} (${r.p}x${r.l})</span> <button onclick="delRoom(${i})" class="text-red-500 text-xs">Hapus</button>`;
+                list.appendChild(li);
+
+                curX += w + 10;
+                if(curX > canvas.width - 100) { curX = 20; curY += maxY + 10; maxY = 0; }
+                else maxY = Math.max(maxY, h);
+            });
+
+            document.getElementById('denah-luas').innerText = totalLuas.toFixed(2) + ' m²';
+            document.getElementById('denah-biaya').innerText = formatRupiah(totalBiaya);
+            updateDashboard();
+        }
+
+        function addRoom() {
+            const name = document.getElementById('room-name').value || "Ruang";
+            const p = parseFloat(document.getElementById('room-p').value) || 0;
+            const l = parseFloat(document.getElementById('room-l').value) || 0;
+            const cost = parseFloat(document.getElementById('room-cost').value) || 0;
+            
+            if(p && l) {
+                rooms.push({name, p, l, cost});
+                localStorage.setItem('civilPro_rooms', JSON.stringify(rooms));
+                drawDenah();
+            }
+        }
+
+        function clearRooms() {
+            if(confirm("Hapus semua denah?")) {
+                rooms = [];
+                localStorage.setItem('civilPro_rooms', JSON.stringify(rooms));
+                drawDenah();
+            }
+        }
+        function delRoom(idx) {
+            rooms.splice(idx, 1);
+            localStorage.setItem('civilPro_rooms', JSON.stringify(rooms));
+            drawDenah();
+        }
+
+        // --- 3. LISTRIK ---
+        let elecRows = JSON.parse(localStorage.getItem('civilPro_elec')) || [
+            {name: "Kabel NYM 3x2.5mm", qty: 50, price: 12000},
+            {name: "Stop Kontak", qty: 10, price: 25000},
+            {name: "Saklar 1 Gang", qty: 8, price: 15000},
+            {name: "Lampu LED", qty: 8, price: 35000}
+        ];
+
+        function renderElecTable() {
+            const tbody = document.getElementById('elec-table-body');
+            tbody.innerHTML = elecRows.map((r, i) => `
+                <tr class="border-b">
+                    <td class="p-2"><input type="text" value="${r.name}" onchange="updateElec(${i}, 'name', this.value)" class="w-full border p-1 rounded"></td>
+                    <td class="p-2"><input type="number" value="${r.qty}" onchange="updateElec(${i}, 'qty', this.value)" class="w-full border p-1 rounded"></td>
+                    <td class="p-2"><input type="number" value="${r.price}" onchange="updateElec(${i}, 'price', this.value)" class="w-full border p-1 rounded"></td>
+                    <td class="p-2 font-bold">${formatRupiah(r.qty * r.price)}</td>
+                    <td class="p-2 text-center"><button onclick="delElecRow(${i})" class="text-red-500">X</button></td>
+                </tr>
+            `).join('');
+            calcElecTotal();
+        }
+
+        function addElecRow() {
+            elecRows.push({name: "Item Baru", qty: 1, price: 0});
+            renderElecTable();
+        }
+
+        function updateElec(idx, field, val) {
+            elecRows[idx][field] = field === 'name' ? val : parseFloat(val);
+            localStorage.setItem('civilPro_elec', JSON.stringify(elecRows));
+            renderElecTable();
+        }
+
+        function delElecRow(idx) {
+            elecRows.splice(idx, 1);
+            localStorage.setItem('civilPro_elec', JSON.stringify(elecRows));
+            renderElecTable();
+        }
+
+        function calcElecTotal() {
+            const total = elecRows.reduce((acc, r) => acc + (r.qty * r.price), 0);
+            document.getElementById('elec-total').innerText = formatRupiah(total);
+            updateDashboard();
+        }
+
+        // --- 4. RAB BANGUNAN ---
+        function hitungBangunan() {
+            const p = parseFloat(document.getElementById('b-panjang').value) || 0;
+            const l = parseFloat(document.getElementById('b-lebar').value) || 0;
+            const t = parseFloat(document.getElementById('b-tinggi').value) || 0;
+            const luasPlat = parseFloat(document.getElementById('b-luas-plat').value) || 0;
+
+            const hBeton = parseFloat(document.getElementById('h-beton').value) || 0;
+            const hBesi = parseFloat(document.getElementById('h-besi').value) || 0;
+            const hSemen = parseFloat(document.getElementById('h-semen').value) || 0;
+            const hPasir = parseFloat(document.getElementById('h-pasir').value) || 0;
+            const hKeramik = parseFloat(document.getElementById('h-keramik').value) || 0;
+            const hCat = parseFloat(document.getElementById('h-cat').value) || 0;
+
+            // Estimasi Sederhana
+            const luasLantai = p * l;
+            const keliling = 2 * (p + l);
+            const luasDinding = keliling * t;
+            
+            // 1. Struktur
+            const volBeton = luasPlat * 0.12; // asumsi tebal 12cm
+            const besi = volBeton * 100; // asumsi 100kg/m3
+            const biayaBeton = volBeton * hBeton;
+            const biayaBesi = besi * hBesi;
+            const totalStruktur = biayaBeton + biayaBesi;
+
+            // 2. Dinding (Rough Est)
+            const volDinding = luasDinding * 0.15; // tebal 15cm
+            const semenD = volDinding * 6; // 6 sak/m3
+            const pasirD = volDinding * 0.8; // 0.8 m3/m3
+            const totalDinding = (semenD * hSemen) + (pasirD * hPasir);
+
+            // 3. Finishing
+            const biayaKeramik = luasLantai * hKeramik;
+            const biayaCat = (luasDinding * 2 + luasLantai) * hCat; // 2 sisi dinding + plafon
+            const totalFinishing = biayaKeramik + biayaCat;
+
+            const grandTotal = totalStruktur + totalDinding + totalFinishing;
+
+            document.getElementById('res-struktur').innerText = formatRupiah(totalStruktur);
+            document.getElementById('res-dinding').innerText = formatRupiah(totalDinding);
+            document.getElementById('res-finishing').innerText = formatRupiah(totalFinishing);
+            document.getElementById('res-total-bangunan').innerText = formatRupiah(grandTotal);
+        }
+
+        // --- 5. PONDASI VISUAL ---
+        function drawPondasi() {
+            const la = parseFloat(document.getElementById('p-la').value) || 30;
+            const lb = parseFloat(document.getElementById('p-lb').value) || 60;
+            const t = parseFloat(document.getElementById('p-t').value) || 70;
+            const aan = document.getElementById('p-aan').checked;
+            
+            const s = 1.5; // scale
+            const cx = 150; const by = 180;
+            
+            let svg = `<svg width="300" height="220">`;
+            
+            // Tanah
+            svg += `<rect x="0" y="${by}" width="300" height="20" fill="#8B4513" opacity="0.2"/>`;
+            
+            // Pondasi
+            const py = by;
+            const topW = la * s; const botW = lb * s; const ponH = t * s;
+            svg += `<polygon points="${cx-botW/2},${py} ${cx+botW/2},${py} ${cx+topW/2},${py-ponH} ${cx-topW/2},${py-ponH}" fill="#64748b" stroke="#334155"/>`;
+            svg += `<text x="${cx}" y="${py-ponH-10}" text-anchor="middle" font-size="10" fill="#2563eb">${la}cm</text>`;
+            svg += `<text x="${cx}" y="${by+15}" text-anchor="middle" font-size="10" fill="#2563eb">${lb}cm</text>`;
+            svg += `</svg>`;
+            
+            document.getElementById('pondasi-svg-container').innerHTML = svg;
+        }
+
+        function hitungPondasi() {
+            const la = parseFloat(document.getElementById('p-la').value) / 100;
+            const lb = parseFloat(document.getElementById('p-lb').value) / 100;
+            const t = parseFloat(document.getElementById('p-t').value) / 100;
+            const p = parseFloat(document.getElementById('p-p').value);
+            
+            const hBatu = parseFloat(document.getElementById('hp-batu').value);
+            const hSemen = parseFloat(document.getElementById('hp-semen').value);
+
+            const vol = ((la + lb) / 2) * t * p;
+            const volBatu = vol * 0.7; // 70% batu
+            const volSpesi = vol * 0.3; // 30% spesi
+            
+            // Asumsi 1 sak semen = 0.024 m3 mortar
+            const sakSemen = Math.ceil(volSpesi / 0.024);
+
+            const biaya = (volBatu * hBatu) + (sakSemen * hSemen);
+
+            document.getElementById('res-vol').innerText = vol.toFixed(2) + " m³";
+            document.getElementById('res-batu').innerText = volBatu.toFixed(2) + " m³";
+            document.getElementById('res-semen').innerText = sakSemen + " Sak";
+            document.getElementById('res-total-pondasi').innerText = formatRupiah(biaya);
+        }
+
+        // --- DASHBOARD AGGREGATOR ---
+        function updateDashboard() {
+            // Get Elec Total
+            const elecTotal = elecRows.reduce((acc, r) => acc + (r.qty * r.price), 0);
+            
+            // Get Denah Total
+            const denahTotal = rooms.reduce((acc, r) => acc + (r.p * r.l * r.cost), 0);
+
+            // Get Building Total (need to grab from DOM or recalculate, grabbing DOM for simplicity here)
+            const bText = document.getElementById('res-total-bangunan').innerText;
+            const bTotal = bText.includes('Rp') ? parseRupiah(bText) : 0;
+
+            const pText = document.getElementById('res-total-pondasi').innerText;
+            const pTotal = pText.includes('Rp') ? parseRupiah(pText) : 0;
+
+            const grandTotal = elecTotal + denahTotal + bTotal + pTotal;
+            document.getElementById('dash-total').innerText = formatRupiah(grandTotal);
+            document.getElementById('dash-items').innerText = rooms.length + elecRows.length;
+        }
+
+        function parseRupiah(str) {
+            return parseInt(str.replace(/[^0-9]/g, '')) || 0;
+        }
+
+        // --- INIT ---
+        window.onload = function() {
+            switchTab('dashboard');
+            renderChecklist();
+            drawDenah();
+            renderElecTable();
+            drawPondasi();
+            
+            // Default calculation for pondasi visuals
+            hitungPondasi();
+        }
+
+    </script>
+</body>
+</html>
