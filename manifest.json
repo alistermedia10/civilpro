@@ -1,11 +1,11 @@
 {
-  "name": "Alister Engineering - Aplikasi Sipil",
-  "short_name": "Alister Enginering",
-  "description": "Aplikasi Kalkulator Sipil Terpadu",
+  "name": "Alister Engineering - Pro",
+  "short_name": "Alister Eng",
+  "description": "Sistem Perhitungan Struktur & Estimasi Biaya Pro (Denah, RAB, Listrik)",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#f1f5f9",
-  "theme_color": "#2563eb",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
   "orientation": "portrait",
   "scope": "./",
   "icons": [
