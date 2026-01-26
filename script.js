@@ -5,7 +5,7 @@ function parseRupiah(str) {
     return parseInt(str.replace(/[^0-9]/g, '')) || 0;
 }
 
-// --- 2. NAVIGATION LOGIC ---
+// --- 2. NAVIGATION LOGIC (UPDATED FOR BOTTOM NAV) ---
 function switchTab(tabId) {
     // Hide all tabs
     document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -13,26 +13,86 @@ function switchTab(tabId) {
     const target = document.getElementById(tabId);
     if(target) target.classList.add('active');
     
-    // Update Nav Button Styles
-    document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.classList.remove('bg-blue-600', 'text-white', 'shadow-md');
-        btn.classList.add('bg-slate-100', 'text-slate-600');
+    // --- UPDATE BOTTOM NAV STYLES ---
+    document.querySelectorAll('.nav-btn-bottom').forEach(btn => {
+        // Reset style
+        btn.classList.remove('text-blue-600', 'font-bold');
+        btn.classList.add('text-slate-400');
+        
+        // Set active style if onclick contains the tabId
         if(btn.onclick.toString().includes(tabId)) {
-            btn.classList.remove('bg-slate-100', 'text-slate-600');
-            btn.classList.add('bg-blue-600', 'text-white', 'shadow-md');
+            btn.classList.remove('text-slate-400');
+            btn.classList.add('text-blue-600', 'font-bold');
         }
     });
 
-    // Refresh canvas if denah is opened (fix render issues on tab switch)
-    if(tabId === 'denah') {
-        drawDenah();
-    }
-    if(tabId === 'pondasi') {
-        drawPondasi();
+    // Refresh canvas if needed
+    if(tabId === 'denah') drawDenah();
+    if(tabId === 'pondasi') drawPondasi();
+    
+    // Load blog if switched to blog tab
+    if(tabId === 'blog') loadBlog();
+}
+
+// --- 3. BLOG FETCH LOGIC ---
+async function loadBlog() {
+    const loadingEl = document.getElementById('blog-loading');
+    const containerEl = document.getElementById('blog-container');
+    const errorEl = document.getElementById('blog-error');
+
+    loadingEl.classList.remove('hidden');
+    containerEl.classList.add('hidden');
+    errorEl.classList.add('hidden');
+
+    try {
+        // Mengambil Feed JSON dari Blogger
+        // Menggunakan parameter alt=json untuk format data JSON
+        const response = await fetch('https://alister10.blogspot.com/feeds/posts/default?alt=json&max-results=6');
+        
+        if (!response.ok) throw new Error('Gagal mengambil data');
+        
+        const data = await response.json();
+        const posts = data.feed.entry;
+
+        if (!posts || posts.length === 0) {
+            containerEl.innerHTML = '<p class="text-center text-slate-500">Belum ada artikel.</p>';
+        } else {
+            containerEl.innerHTML = posts.map(post => {
+                // Ambil Judul
+                const title = post.title.$t;
+                // Ambil Link (cari rel="alternate")
+                const link = post.link.find(l => l.rel === 'alternate').href;
+                // Ambil Tanggal
+                const date = new Date(post.published.$t).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+                // Ambil Konten (Snippet)
+                let content = post.content.$t;
+                // Hapus tag HTML dan potong teks
+                const plainText = content.replace(/<[^>]*>?/gm, '').substring(0, 120) + '...';
+
+                return `
+                    <article class="border border-slate-200 rounded-lg p-4 hover:shadow-md transition bg-white flex flex-col h-full">
+                        <h4 class="font-bold text-blue-800 mb-2 leading-tight text-lg">${title}</h4>
+                        <p class="text-sm text-slate-600 mb-4 flex-grow">${plainText}</p>
+                        <div class="flex justify-between items-center mt-auto border-t pt-3">
+                            <span class="text-xs text-slate-400 bg-slate-100 px-2 py-1 rounded">${date}</span>
+                            <a href="${link}" target="_blank" class="text-xs font-bold text-blue-600 hover:underline">Baca Selengkapnya &rarr;</a>
+                        </div>
+                    </article>
+                `;
+            }).join('');
+        }
+
+        loadingEl.classList.add('hidden');
+        containerEl.classList.remove('hidden');
+
+    } catch (error) {
+        console.error('Blog Error:', error);
+        loadingEl.classList.add('hidden');
+        errorEl.classList.remove('hidden');
     }
 }
 
-// --- 3. DASHBOARD & CHECKLIST ---
+// --- 4. DASHBOARD & CHECKLIST (Sama seperti sebelumnya) ---
 const defaultTasks = [
     "Survei Lokasi", "Pembersihan Lahan", "Galian Pondasi", "Pasang Pondasi", 
     "Pasang Sloof/Kolom", "Pasang Dinding", "Rangka Atap", "Plat Lantai", 
@@ -81,17 +141,16 @@ function updateProgress() {
     if(elBar) elBar.style.width = pct + '%';
 }
 
-// --- 4. DENAH RUMAH ---
+// --- 5. DENAH (Sama seperti sebelumnya) ---
 let rooms = JSON.parse(localStorage.getItem('civilPro_rooms')) || [];
 const canvas = document.getElementById('blueprintCanvas');
 const ctx = canvas ? canvas.getContext('2d') : null;
-const SCALE = 20; // 1m = 20px
+const SCALE = 20; 
 
 function drawDenah() {
     if(!ctx) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // Grid lines
     ctx.strokeStyle = '#e2e8f0';
     ctx.lineWidth = 1;
     for(let i=0; i<canvas.width; i+=SCALE) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,canvas.height); ctx.stroke(); }
@@ -113,19 +172,16 @@ function drawDenah() {
         totalLuas += luas;
         totalBiaya += biaya;
 
-        // Draw Room
         ctx.fillStyle = i % 2 === 0 ? '#bfdbfe' : '#ddd6fe';
         ctx.fillRect(curX, curY, w, h);
         ctx.strokeStyle = '#334155';
         ctx.strokeRect(curX, curY, w, h);
         
-        // Text
         ctx.fillStyle = '#0f172a';
         ctx.font = '10px sans-serif';
         ctx.fillText(r.name, curX + 5, curY + 15);
         ctx.fillText(`${r.p}x${r.l}`, curX + 5, curY + 28);
 
-        // Add to list
         if(list) {
             const li = document.createElement('li');
             li.className = "flex justify-between border-b border-slate-100 py-1";
@@ -176,14 +232,13 @@ function clearRooms() {
         drawDenah();
     }
 }
-
 function delRoom(idx) {
     rooms.splice(idx,1);
     localStorage.setItem('civilPro_rooms', JSON.stringify(rooms));
     drawDenah();
 }
 
-// --- 5. INSTALASI LISTRIK ---
+// --- 6. LISTRIK (Sama seperti sebelumnya) ---
 let elecRows = JSON.parse(localStorage.getItem('civilPro_elec')) || [
     {name: "Kabel NYM 3x2.5mm", qty: 50, price: 12000},
     {name: "Stop Kontak", qty: 10, price: 25000},
@@ -232,7 +287,7 @@ function calcElecTotal() {
     updateDashboard();
 }
 
-// --- 6. RAB BANGUNAN ---
+// --- 7. RAB BANGUNAN (Sama seperti sebelumnya) ---
 function hitungBangunan() {
     const elPanjang = document.getElementById('b-panjang');
     const elLebar = document.getElementById('b-lebar');
@@ -251,27 +306,23 @@ function hitungBangunan() {
     const t = elTinggi ? parseFloat(elTinggi.value) : 0;
     const luasPlat = elLuasPlat ? parseFloat(elLuasPlat.value) : 0;
 
-    // Estimasi Sederhana
     const luasLantai = p * l;
     const keliling = 2 * (p + l);
     const luasDinding = keliling * t;
     
-    // 1. Struktur
-    const volBeton = luasPlat * 0.12; // asumsi tebal 12cm
-    const besi = volBeton * 100; // asumsi 100kg/m3
+    const volBeton = luasPlat * 0.12; 
+    const besi = volBeton * 100; 
     const biayaBeton = volBeton * hBeton;
     const biayaBesi = besi * hBesi;
     const totalStruktur = biayaBeton + biayaBesi;
 
-    // 2. Dinding (Rough Est)
-    const volDinding = luasDinding * 0.15; // tebal 15cm
-    const semenD = volDinding * 6; // 6 sak/m3
-    const pasirD = volDinding * 0.8; // 0.8 m3/m3
+    const volDinding = luasDinding * 0.15; 
+    const semenD = volDinding * 6; 
+    const pasirD = volDinding * 0.8; 
     const totalDinding = (semenD * hSemen) + (pasirD * hPasir);
 
-    // 3. Finishing
     const biayaKeramik = luasLantai * hKeramik;
-    const biayaCat = (luasDinding * 2 + luasLantai) * hCat; // 2 sisi dinding + plafon
+    const biayaCat = (luasDinding * 2 + luasLantai) * hCat; 
     const totalFinishing = biayaKeramik + biayaCat;
 
     const grandTotal = totalStruktur + totalDinding + totalFinishing;
@@ -285,11 +336,10 @@ function hitungBangunan() {
     if(elResDinding) elResDinding.innerText = formatRupiah(totalDinding);
     if(elResFinishing) elResFinishing.innerText = formatRupiah(totalFinishing);
     if(elResTotal) elResTotal.innerText = formatRupiah(grandTotal);
-
     updateDashboard();
 }
 
-// --- 7. PONDASI VISUAL ---
+// --- 8. PONDASI VISUAL (Sama seperti sebelumnya) ---
 function drawPondasi() {
     const elLA = document.getElementById('p-la');
     const elLB = document.getElementById('p-lb');
@@ -303,15 +353,13 @@ function drawPondasi() {
     const t = parseFloat(elT.value) || 70;
     const aan = elAan ? elAan.checked : false;
     
-    const s = 1.5; // scale
+    const s = 1.5; 
     const cx = 150; const by = 180;
     
     let svg = `<svg width="300" height="220">`;
     
-    // Tanah
     svg += `<rect x="0" y="${by}" width="300" height="20" fill="#8B4513" opacity="0.2"/>`;
     
-    // Pondasi
     const py = by;
     const topW = la * s; const botW = lb * s; const ponH = t * s;
     svg += `<polygon points="${cx-botW/2},${py} ${cx+botW/2},${py} ${cx+topW/2},${py-ponH} ${cx-topW/2},${py-ponH}" fill="#64748b" stroke="#334155"/>`;
@@ -333,10 +381,9 @@ function hitungPondasi() {
     const hSemen = parseFloat(document.getElementById('hp-semen').value);
 
     const vol = ((la + lb) / 2) * t * p;
-    const volBatu = vol * 0.7; // 70% batu
-    const volSpesi = vol * 0.3; // 30% spesi
+    const volBatu = vol * 0.7; 
+    const volSpesi = vol * 0.3; 
     
-    // Asumsi 1 sak semen = 0.024 m3 mortar
     const sakSemen = Math.ceil(volSpesi / 0.024);
 
     const biaya = (volBatu * hBatu) + (sakSemen * hSemen);
@@ -350,23 +397,17 @@ function hitungPondasi() {
     if(elBatu) elBatu.innerText = volBatu.toFixed(2) + " m³";
     if(elSemen) elSemen.innerText = sakSemen + " Sak";
     if(elTotal) elTotal.innerText = formatRupiah(biaya);
-
     updateDashboard();
 }
 
-// --- 8. AGGREGATOR & PWA INIT ---
+// --- 9. AGGREGATOR & INIT ---
 function updateDashboard() {
-    // Get Elec Total
     const elecTotal = elecRows.reduce((acc, r) => acc + (r.qty * r.price), 0);
-    
-    // Get Denah Total
     const denahTotal = rooms.reduce((acc, r) => acc + (r.p * r.l * r.cost), 0);
-
-    // Get Building Total (Grab from DOM text)
+    
     const bText = document.getElementById('res-total-bangunan') ? document.getElementById('res-total-bangunan').innerText : "Rp 0";
     const bTotal = parseRupiah(bText);
 
-    // Get Pondasi Total
     const pText = document.getElementById('res-total-pondasi') ? document.getElementById('res-total-pondasi').innerText : "Rp 0";
     const pTotal = parseRupiah(pText);
 
@@ -379,50 +420,7 @@ function updateDashboard() {
     if(elDashItems) elDashItems.innerText = rooms.length + elecRows.length;
 }
 
-// PWA SERVICE WORKER REGISTRATION & INSTALL PROMPT
 window.addEventListener('load', () => {
-    // 1. Register Service Worker
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js')
-            .then((registration) => {
-                console.log('ServiceWorker registration successful with scope: ', registration.scope);
-            }, (err) => {
-                console.log('ServiceWorker registration failed: ', err);
-            });
-    }
-
-    // 2. Handle Install Prompt (Add to Home Screen)
-    let deferredPrompt;
-    const installBtn = document.getElementById('btn-install-pwa'); // Pastikan Anda punya tombol ini di HTML jika ingin custom prompt, atau biarkan browser handle default.
-    
-    window.addEventListener('beforeinstallprompt', (e) => {
-        console.log('beforeinstallprompt fired');
-        // Prevent Chrome 67 and earlier from automatically showing the prompt
-        e.preventDefault();
-        // Stash the event so it can be triggered later.
-        deferredPrompt = e;
-
-        // Update UI notify the user they can add to home screen
-        // if(installBtn) installBtn.style.display = 'block';
-    });
-
-    // if(installBtn) {
-    //     installBtn.addEventListener('click', (e) => {
-    //         // Show the prompt
-    //         deferredPrompt.prompt();
-    //         // Wait for the user to respond to the prompt
-    //         deferredPrompt.userChoice.then((choiceResult) => {
-    //             if (choiceResult.outcome === 'accepted') {
-    //                 console.log('User accepted the A2HS prompt');
-    //             } else {
-    //                 console.log('User dismissed the A2HS prompt');
-    //             }
-    //             deferredPrompt = null;
-    //         });
-    //     });
-    // }
-
-    // --- INIT APP LOGIC ---
     switchTab('dashboard');
     renderChecklist();
     drawDenah();
