@@ -5,7 +5,7 @@ function parseRupiah(str) {
     return parseInt(str.replace(/[^0-9]/g, '')) || 0;
 }
 
-// --- 2. NAVIGATION LOGIC ---
+// --- 2. NAVIGATION LOGIC (UPDATED FOR PRO THEME) ---
 function switchTab(tabId) {
     // Hide all tabs
     document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -13,16 +13,16 @@ function switchTab(tabId) {
     const target = document.getElementById(tabId);
     if(target) target.classList.add('active');
     
-    // --- UPDATE BOTTOM NAV STYLES ---
+    // --- UPDATE BOTTOM NAV STYLES (Pro Version) ---
     document.querySelectorAll('.nav-btn-bottom').forEach(btn => {
         // Reset style
-        btn.classList.remove('text-blue-600', 'font-bold');
-        btn.classList.add('text-slate-400');
+        btn.classList.remove('text-white', 'font-bold');
+        btn.classList.add('text-slate-500');
         
-        // Set active style
+        // Set active style if button onclick contains tabId
         if(btn.onclick.toString().includes(tabId)) {
-            btn.classList.remove('text-slate-400');
-            btn.classList.add('text-blue-600', 'font-bold');
+            btn.classList.remove('text-slate-500');
+            btn.classList.add('text-white', 'font-bold');
         }
     });
 
@@ -57,30 +57,35 @@ async function loadBlog() {
         const posts = data.feed.entry;
 
         if (!posts || posts.length === 0) {
-            containerEl.innerHTML = '<p class="text-center text-slate-500">Belum ada artikel.</p>';
+            containerEl.innerHTML = '<p class="text-center text-slate-500 py-10">Belum ada artikel tersedia.</p>';
+            containerEl.classList.remove('hidden');
         } else {
             containerEl.innerHTML = posts.map(post => {
+                // Ambil Judul
                 const title = post.title.$t;
+                // Ambil Link
                 const link = post.link.find(l => l.rel === 'alternate').href;
+                // Ambil Tanggal
                 const date = new Date(post.published.$t).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+                // Ambil Konten & Bersihkan HTML
                 let content = post.content.$t;
-                const plainText = content.replace(/<[^>]*>?/gm, '').substring(0, 120) + '...';
+                const plainText = content.replace(/<[^>]*>?/gm, '').substring(0, 130) + '...';
 
                 return `
-                    <article class="border border-slate-200 rounded-lg p-4 hover:shadow-md transition bg-white flex flex-col h-full">
-                        <h4 class="font-bold text-blue-800 mb-2 leading-tight text-lg">${title}</h4>
-                        <p class="text-sm text-slate-600 mb-4 flex-grow">${plainText}</p>
-                        <div class="flex justify-between items-center mt-auto border-t pt-3">
-                            <span class="text-xs text-slate-400 bg-slate-100 px-2 py-1 rounded">${date}</span>
-                            <a href="${link}" target="_blank" class="text-xs font-bold text-blue-600 hover:underline">Baca Selengkapnya &rarr;</a>
+                    <article class="bg-white border border-slate-200 rounded-xl p-5 hover:shadow-md hover:border-[#0f172a] transition-all duration-300 flex flex-col h-full group">
+                        <h4 class="font-bold text-slate-800 mb-2 leading-tight text-lg group-hover:text-[#0f172a] transition-colors">${title}</h4>
+                        <p class="text-sm text-slate-500 mb-4 line-clamp-3 flex-grow">${plainText}</p>
+                        <div class="flex justify-between items-center mt-auto pt-3 border-t border-slate-100">
+                            <span class="text-xs text-slate-400 bg-slate-100 px-2 py-1 rounded-full">${date}</span>
+                            <a href="${link}" target="_blank" class="text-xs font-bold text-[#0f172a] hover:underline bg-slate-100 px-3 py-1.5 rounded-full transition-colors">Baca Selengkapnya</a>
                         </div>
                     </article>
                 `;
             }).join('');
+            containerEl.classList.remove('hidden');
         }
 
         loadingEl.classList.add('hidden');
-        containerEl.classList.remove('hidden');
 
     } catch (error) {
         console.error('Blog Error:', error);
@@ -91,27 +96,29 @@ async function loadBlog() {
 
 // --- 4. DASHBOARD & CHECKLIST ---
 const defaultTasks = [
-    "Survei Lokasi", "Pembersihan Lahan", "Galian Pondasi", "Pasang Pondasi", 
-    "Pasang Sloof/Kolom", "Pasang Dinding", "Rangka Atap", "Plat Lantai", 
-    "Kusen & Pintu", "Instalasi Listrik", "Instalasi Air", "Plester & Aci", "Cat & Finishing"
+    "Survei & Analisa Lokasi", "Pembersihan Lahan", "Pengukuran & Bouwplank", "Galian Pondasi", "Pasang Pondasi Batu Kali", 
+    "Pasang Sloof & Kolom Praktis", "Pasang Dinding Bata", "Pemasangan Rangka Atap", "Cor Plat Lantai", 
+    "Pemasangan Kusen, Pintu & Jendela", "Instalasi Listrik (Rough In)", "Instalasi Air Bersih", 
+    "Plester & Aci Dinding", "Pekerjaan Lantai Keramik", "Pengecatan Akhir", "Pembersihan Akhir & Serah Terima"
 ];
 
-let tasks = JSON.parse(localStorage.getItem('civilPro_tasks')) || defaultTasks.map(t => ({name: t, done: false}));
+// Ganti Key LocalStorage agar tidak bentrok dengan versi gratis
+let tasks = JSON.parse(localStorage.getItem('alisterPro_tasks')) || defaultTasks.map(t => ({name: t, done: false}));
 
 function renderChecklist() {
     const container = document.getElementById('checklist-container');
     if(!container) return;
     
     container.innerHTML = tasks.map((t, i) => `
-        <div class="flex items-center p-3 bg-slate-50 rounded-lg border border-slate-100 cursor-pointer hover:bg-slate-100 transition" onclick="toggleTask(${i})">
-            <div class="w-5 h-5 rounded border ${t.done ? 'bg-green-500 border-green-500' : 'border-slate-300'} flex items-center justify-center mr-3 text-white text-xs">
+        <div class="flex items-center p-3 bg-slate-50 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-100 transition-colors" onclick="toggleTask(${i})">
+            <div class="w-5 h-5 rounded border ${t.done ? 'bg-[#0f172a] border-[#0f172a]' : 'border-slate-300'} flex items-center justify-center mr-3 text-white text-xs shadow-sm transition-colors">
                 ${t.done ? '✓' : ''}
             </div>
-            <span class="${t.done ? 'line-through text-slate-400' : 'text-slate-700'}">${t.name}</span>
+            <span class="${t.done ? 'line-through text-slate-400' : 'text-slate-700 font-medium'}">${t.name}</span>
         </div>
     `).join('');
     updateProgress();
-    localStorage.setItem('civilPro_tasks', JSON.stringify(tasks));
+    localStorage.setItem('alisterPro_tasks', JSON.stringify(tasks));
 }
 
 function toggleTask(idx) {
@@ -121,7 +128,7 @@ function toggleTask(idx) {
 }
 
 function resetChecklist() {
-    if(confirm('Reset checklist proyek?')) {
+    if(confirm('Reset checklist proyek kembali ke awal?')) {
         tasks = defaultTasks.map(t => ({name: t, done: false}));
         renderChecklist();
         updateDashboard();
@@ -139,10 +146,11 @@ function updateProgress() {
 }
 
 // --- 5. DENAH RUMAH ---
-let rooms = JSON.parse(localStorage.getItem('civilPro_rooms')) || [];
+// Ganti Key LocalStorage
+let rooms = JSON.parse(localStorage.getItem('alisterPro_rooms')) || [];
 const canvas = document.getElementById('blueprintCanvas');
 const ctx = canvas ? canvas.getContext('2d') : null;
-const SCALE = 20; // 1m = 20px
+const SCALE = 20; 
 
 function drawDenah() {
     if(!ctx) return;
@@ -170,23 +178,23 @@ function drawDenah() {
         totalLuas += luas;
         totalBiaya += biaya;
 
-        // Draw Room
-        ctx.fillStyle = i % 2 === 0 ? '#bfdbfe' : '#ddd6fe';
+        // Draw Room (Updated Colors for Pro: Slate Blues)
+        ctx.fillStyle = i % 2 === 0 ? '#cbd5e1' : '#94a3b8'; 
         ctx.fillRect(curX, curY, w, h);
         ctx.strokeStyle = '#334155';
         ctx.strokeRect(curX, curY, w, h);
         
         // Text
         ctx.fillStyle = '#0f172a';
-        ctx.font = '10px sans-serif';
+        ctx.font = 'bold 10px sans-serif';
         ctx.fillText(r.name, curX + 5, curY + 15);
         ctx.fillText(`${r.p}x${r.l}`, curX + 5, curY + 28);
 
         // Add to list
         if(list) {
             const li = document.createElement('li');
-            li.className = "flex justify-between border-b border-slate-100 py-1";
-            li.innerHTML = `<span>${r.name} (${r.p}x${r.l})</span> <button onclick="delRoom(${i})" class="text-red-500 text-xs">Hapus</button>`;
+            li.className = "flex justify-between border-b border-slate-200 py-2 text-slate-600";
+            li.innerHTML = `<span>${r.name} (${r.p}x${r.l})</span> <button onclick="delRoom(${i})" class="text-red-500 hover:text-red-700 text-xs font-bold ml-2">Hapus</button>`;
             list.appendChild(li);
         }
 
@@ -213,38 +221,40 @@ function addRoom() {
     const elCost = document.getElementById('room-cost');
 
     if(elP && elL && elCost && elName) {
-        const name = elName.value || "Ruang";
+        const name = elName.value || "Ruang Utama";
         const p = parseFloat(elP.value) || 0;
         const l = parseFloat(elL.value) || 0;
         const cost = parseFloat(elCost.value) || 0;
         
         if(p && l) {
             rooms.push({name, p, l, cost});
-            localStorage.setItem('civilPro_rooms', JSON.stringify(rooms));
+            localStorage.setItem('alisterPro_rooms', JSON.stringify(rooms));
             drawDenah();
         }
     }
 }
 
 function clearRooms() {
-    if(confirm("Hapus semua denah?")) {
+    if(confirm("Hapus semua data denah ruangan?")) {
         rooms = [];
-        localStorage.setItem('civilPro_rooms', JSON.stringify(rooms));
+        localStorage.setItem('alisterPro_rooms', JSON.stringify(rooms));
         drawDenah();
     }
 }
+
 function delRoom(idx) {
     rooms.splice(idx,1);
-    localStorage.setItem('civilPro_rooms', JSON.stringify(rooms));
+    localStorage.setItem('alisterPro_rooms', JSON.stringify(rooms));
     drawDenah();
 }
 
 // --- 6. INSTALASI LISTRIK ---
-let elecRows = JSON.parse(localStorage.getItem('civilPro_elec')) || [
+// Ganti Key LocalStorage
+let elecRows = JSON.parse(localStorage.getItem('alisterPro_elec')) || [
     {name: "Kabel NYM 3x2.5mm", qty: 50, price: 12000},
-    {name: "Stop Kontak", qty: 10, price: 25000},
-    {name: "Saklar 1 Gang", qty: 8, price: 15000},
-    {name: "Lampu LED", qty: 8, price: 35000}
+    {name: "Stop Kontak Listrik", qty: 10, price: 25000},
+    {name: "Saklar Tunggal 1 Gang", qty: 8, price: 15000},
+    {name: "Lampu LED Philips", qty: 8, price: 35000}
 ];
 
 function renderElecTable() {
@@ -252,12 +262,12 @@ function renderElecTable() {
     if(!tbody) return;
     
     tbody.innerHTML = elecRows.map((r, i) => `
-        <tr class="border-b">
-            <td class="p-2"><input type="text" value="${r.name}" onchange="updateElec(${i}, 'name', this.value)" class="w-full border p-1 rounded"></td>
-            <td class="p-2"><input type="number" value="${r.qty}" onchange="updateElec(${i}, 'qty', this.value)" class="w-full border p-1 rounded"></td>
-            <td class="p-2"><input type="number" value="${r.price}" onchange="updateElec(${i}, 'price', this.value)" class="w-full border p-1 rounded"></td>
-            <td class="p-2 font-bold">${formatRupiah(r.qty * r.price)}</td>
-            <td class="p-2 text-center"><button onclick="delElecRow(${i})" class="text-red-500">X</button></td>
+        <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+            <td class="p-3"><input type="text" value="${r.name}" onchange="updateElec(${i}, 'name', this.value)" class="w-full border border-slate-200 p-2 rounded text-sm focus:border-[#0f172a] focus:outline-none"></td>
+            <td class="p-3"><input type="number" value="${r.qty}" onchange="updateElec(${i}, 'qty', this.value)" class="w-full border border-slate-200 p-2 rounded text-sm focus:border-[#0f172a] focus:outline-none"></td>
+            <td class="p-3"><input type="number" value="${r.price}" onchange="updateElec(${i}, 'price', this.value)" class="w-full border border-slate-200 p-2 rounded text-sm focus:border-[#0f172a] focus:outline-none"></td>
+            <td class="p-3 font-bold text-slate-700">${formatRupiah(r.qty * r.price)}</td>
+            <td class="p-3 text-center"><button onclick="delElecRow(${i})" class="text-slate-400 hover:text-red-500 transition-colors">X</button></td>
         </tr>
     `).join('');
     calcElecTotal();
@@ -265,19 +275,19 @@ function renderElecTable() {
 
 function addElecRow() {
     elecRows.push({name: "Item Baru", qty: 1, price: 0});
-    localStorage.setItem('civilPro_elec', JSON.stringify(elecRows));
+    localStorage.setItem('alisterPro_elec', JSON.stringify(elecRows));
     renderElecTable();
 }
 
 function updateElec(idx, field, val) {
     elecRows[idx][field] = field === 'name' ? val : parseFloat(val);
-    localStorage.setItem('civilPro_elec', JSON.stringify(elecRows));
+    localStorage.setItem('alisterPro_elec', JSON.stringify(elecRows));
     renderElecTable();
 }
 
 function delElecRow(idx) {
     elecRows.splice(idx,1);
-    localStorage.setItem('civilPro_elec', JSON.stringify(elecRows));
+    localStorage.setItem('alisterPro_elec', JSON.stringify(elecRows));
     renderElecTable();
 }
 
@@ -307,26 +317,27 @@ function hitungBangunan() {
     const t = elTinggi ? parseFloat(elTinggi.value) : 0;
     const luasPlat = elLuasPlat ? parseFloat(elLuasPlat.value) : 0;
 
+    // Estimasi Sederhana
     const luasLantai = p * l;
     const keliling = 2 * (p + l);
     const luasDinding = keliling * t;
     
     // 1. Struktur
-    const volBeton = luasPlat * 0.12; 
-    const besi = volBeton * 100; 
+    const volBeton = luasPlat * 0.12; // asumsi tebal 12cm
+    const besi = volBeton * 100; // asumsi 100kg/m3
     const biayaBeton = volBeton * hBeton;
     const biayaBesi = besi * hBesi;
     const totalStruktur = biayaBeton + biayaBesi;
 
     // 2. Dinding (Rough Est)
-    const volDinding = luasDinding * 0.15; 
-    const semenD = volDinding * 6; 
-    const pasirD = volDinding * 0.8; 
+    const volDinding = luasDinding * 0.15; // tebal 15cm
+    const semenD = volDinding * 6; // 6 sak/m3
+    const pasirD = volDinding * 0.8; // 0.8 m3/m3
     const totalDinding = (semenD * hSemen) + (pasirD * hPasir);
 
     // 3. Finishing
     const biayaKeramik = luasLantai * hKeramik;
-    const biayaCat = (luasDinding * 2 + luasLantai) * hCat; 
+    const biayaCat = (luasDinding * 2 + luasLantai) * hCat; // 2 sisi dinding + plafon
     const totalFinishing = biayaKeramik + biayaCat;
 
     const grandTotal = totalStruktur + totalDinding + totalFinishing;
@@ -364,14 +375,14 @@ function drawPondasi() {
     let svg = `<svg width="300" height="220">`;
     
     // Tanah
-    svg += `<rect x="0" y="${by}" width="300" height="20" fill="#8B4513" opacity="0.2"/>`;
+    svg += `<rect x="0" y="${by}" width="300" height="20" fill="#57534e" opacity="0.1"/>`; // Sedikit lebih gelap tanah
     
-    // Pondasi
+    // Pondasi (Pro Color: Slate 600)
     const py = by;
     const topW = la * s; const botW = lb * s; const ponH = t * s;
-    svg += `<polygon points="${cx-botW/2},${py} ${cx+botW/2},${py} ${cx+topW/2},${py-ponH} ${cx-topW/2},${py-ponH}" fill="#64748b" stroke="#334155"/>`;
-    svg += `<text x="${cx}" y="${py-ponH-10}" text-anchor="middle" font-size="10" fill="#2563eb">${la}cm</text>`;
-    svg += `<text x="${cx}" y="${by+15}" text-anchor="middle" font-size="10" fill="#2563eb">${lb}cm</text>`;
+    svg += `<polygon points="${cx-botW/2},${py} ${cx+botW/2},${py} ${cx+topW/2},${py-ponH} ${cx-topW/2},${py-ponH}" fill="#475569" stroke="#1e293b"/>`;
+    svg += `<text x="${cx}" y="${py-ponH-10}" text-anchor="middle" font-size="10" fill="#f59e0b" font-weight="bold">${la}cm</text>`;
+    svg += `<text x="${cx}" y="${by+15}" text-anchor="middle" font-size="10" fill="#f59e0b" font-weight="bold">${lb}cm</text>`;
     svg += `</svg>`;
     
     const container = document.getElementById('pondasi-svg-container');
@@ -388,9 +399,10 @@ function hitungPondasi() {
     const hSemen = parseFloat(document.getElementById('hp-semen').value);
 
     const vol = ((la + lb) / 2) * t * p;
-    const volBatu = vol * 0.7; 
-    const volSpesi = vol * 0.3; 
+    const volBatu = vol * 0.7; // 70% batu
+    const volSpesi = vol * 0.3; // 30% spesi
     
+    // Asumsi 1 sak semen = 0.024 m3 mortar
     const sakSemen = Math.ceil(volSpesi / 0.024);
 
     const biaya = (volBatu * hBatu) + (sakSemen * hSemen);
@@ -416,7 +428,7 @@ function updateDashboard() {
     // Get Denah Total
     const denahTotal = rooms.reduce((acc, r) => acc + (r.p * r.l * r.cost), 0);
 
-    // Get Building Total
+    // Get Building Total (Grab from DOM text)
     const bText = document.getElementById('res-total-bangunan') ? document.getElementById('res-total-bangunan').innerText : "Rp 0";
     const bTotal = parseRupiah(bText);
 
@@ -435,19 +447,18 @@ function updateDashboard() {
 
 // --- 10. PWA SERVICE WORKER REGISTRATION ---
 window.addEventListener('load', () => {
+    // 1. Register Service Worker
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('./sw.js')
             .then((registration) => {
-                console.log('✅ Service Worker Berhasil didaftar:', registration.scope);
+                console.log('✅ Alister Engineering Pro: Service Worker Berhasil didaftar.', registration.scope);
             })
             .catch((error) => {
                 console.error('❌ Service Worker Gagal:', error);
             });
-    } else {
-        console.warn('⚠️ Browser ini tidak mendukung Service Worker.');
     }
 
-    // --- INIT APP LOGIC ---
+    // 2. Init App Logic
     switchTab('dashboard');
     renderChecklist();
     drawDenah();
