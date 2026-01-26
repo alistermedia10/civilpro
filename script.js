@@ -5,32 +5,33 @@ function parseRupiah(str) {
     return parseInt(str.replace(/[^0-9]/g, '')) || 0;
 }
 
-// --- 2. NAVIGATION LOGIC (UPDATED FOR BOTTOM NAV) ---
+// --- 2. NAVIGATION LOGIC (INCLUDING BOTTOM NAV) ---
 function switchTab(tabId) {
     // Hide all tabs
     document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    
     // Show target tab
     const target = document.getElementById(tabId);
     if(target) target.classList.add('active');
     
     // --- UPDATE BOTTOM NAV STYLES ---
     document.querySelectorAll('.nav-btn-bottom').forEach(btn => {
-        // Reset style
+        // Reset style (Default: Slate gray)
         btn.classList.remove('text-blue-600', 'font-bold');
         btn.classList.add('text-slate-400');
         
-        // Set active style if onclick contains the tabId
+        // Set active style (Blue + Bold) if button onclick contains tabId
         if(btn.onclick.toString().includes(tabId)) {
             btn.classList.remove('text-slate-400');
             btn.classList.add('text-blue-600', 'font-bold');
         }
     });
 
-    // Refresh canvas if needed
+    // Refresh Canvas jika perlu (fix render issue saat pindah tab)
     if(tabId === 'denah') drawDenah();
     if(tabId === 'pondasi') drawPondasi();
     
-    // Load blog if switched to blog tab
+    // Load Blog jika tab blog dibuka
     if(tabId === 'blog') loadBlog();
 }
 
@@ -40,13 +41,15 @@ async function loadBlog() {
     const containerEl = document.getElementById('blog-container');
     const errorEl = document.getElementById('blog-error');
 
+    if(!loadingEl || !containerEl) return;
+
+    // Reset state
     loadingEl.classList.remove('hidden');
     containerEl.classList.add('hidden');
     errorEl.classList.add('hidden');
 
     try {
-        // Mengambil Feed JSON dari Blogger
-        // Menggunakan parameter alt=json untuk format data JSON
+        // Fetch Feed JSON dari Blogger
         const response = await fetch('https://alister10.blogspot.com/feeds/posts/default?alt=json&max-results=6');
         
         if (!response.ok) throw new Error('Gagal mengambil data');
@@ -56,17 +59,17 @@ async function loadBlog() {
 
         if (!posts || posts.length === 0) {
             containerEl.innerHTML = '<p class="text-center text-slate-500">Belum ada artikel.</p>';
+            containerEl.classList.remove('hidden');
         } else {
             containerEl.innerHTML = posts.map(post => {
                 // Ambil Judul
                 const title = post.title.$t;
-                // Ambil Link (cari rel="alternate")
+                // Ambil Link
                 const link = post.link.find(l => l.rel === 'alternate').href;
                 // Ambil Tanggal
                 const date = new Date(post.published.$t).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
-                // Ambil Konten (Snippet)
+                // Ambil Konten & Bersihkan HTML
                 let content = post.content.$t;
-                // Hapus tag HTML dan potong teks
                 const plainText = content.replace(/<[^>]*>?/gm, '').substring(0, 120) + '...';
 
                 return `
@@ -80,10 +83,10 @@ async function loadBlog() {
                     </article>
                 `;
             }).join('');
+            containerEl.classList.remove('hidden');
         }
 
         loadingEl.classList.add('hidden');
-        containerEl.classList.remove('hidden');
 
     } catch (error) {
         console.error('Blog Error:', error);
@@ -92,7 +95,7 @@ async function loadBlog() {
     }
 }
 
-// --- 4. DASHBOARD & CHECKLIST (Sama seperti sebelumnya) ---
+// --- 4. DASHBOARD & CHECKLIST ---
 const defaultTasks = [
     "Survei Lokasi", "Pembersihan Lahan", "Galian Pondasi", "Pasang Pondasi", 
     "Pasang Sloof/Kolom", "Pasang Dinding", "Rangka Atap", "Plat Lantai", 
@@ -141,16 +144,17 @@ function updateProgress() {
     if(elBar) elBar.style.width = pct + '%';
 }
 
-// --- 5. DENAH (Sama seperti sebelumnya) ---
+// --- 5. DENAH RUMAH ---
 let rooms = JSON.parse(localStorage.getItem('civilPro_rooms')) || [];
 const canvas = document.getElementById('blueprintCanvas');
 const ctx = canvas ? canvas.getContext('2d') : null;
-const SCALE = 20; 
+const SCALE = 20; // 1m = 20px
 
 function drawDenah() {
     if(!ctx) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
+    // Grid lines
     ctx.strokeStyle = '#e2e8f0';
     ctx.lineWidth = 1;
     for(let i=0; i<canvas.width; i+=SCALE) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,canvas.height); ctx.stroke(); }
@@ -172,16 +176,19 @@ function drawDenah() {
         totalLuas += luas;
         totalBiaya += biaya;
 
+        // Draw Room
         ctx.fillStyle = i % 2 === 0 ? '#bfdbfe' : '#ddd6fe';
         ctx.fillRect(curX, curY, w, h);
         ctx.strokeStyle = '#334155';
         ctx.strokeRect(curX, curY, w, h);
         
+        // Text
         ctx.fillStyle = '#0f172a';
         ctx.font = '10px sans-serif';
         ctx.fillText(r.name, curX + 5, curY + 15);
         ctx.fillText(`${r.p}x${r.l}`, curX + 5, curY + 28);
 
+        // Add to list
         if(list) {
             const li = document.createElement('li');
             li.className = "flex justify-between border-b border-slate-100 py-1";
@@ -232,13 +239,14 @@ function clearRooms() {
         drawDenah();
     }
 }
+
 function delRoom(idx) {
     rooms.splice(idx,1);
     localStorage.setItem('civilPro_rooms', JSON.stringify(rooms));
     drawDenah();
 }
 
-// --- 6. LISTRIK (Sama seperti sebelumnya) ---
+// --- 6. INSTALASI LISTRIK ---
 let elecRows = JSON.parse(localStorage.getItem('civilPro_elec')) || [
     {name: "Kabel NYM 3x2.5mm", qty: 50, price: 12000},
     {name: "Stop Kontak", qty: 10, price: 25000},
@@ -287,7 +295,7 @@ function calcElecTotal() {
     updateDashboard();
 }
 
-// --- 7. RAB BANGUNAN (Sama seperti sebelumnya) ---
+// --- 7. RAB BANGUNAN ---
 function hitungBangunan() {
     const elPanjang = document.getElementById('b-panjang');
     const elLebar = document.getElementById('b-lebar');
@@ -306,23 +314,27 @@ function hitungBangunan() {
     const t = elTinggi ? parseFloat(elTinggi.value) : 0;
     const luasPlat = elLuasPlat ? parseFloat(elLuasPlat.value) : 0;
 
+    // Estimasi Sederhana
     const luasLantai = p * l;
     const keliling = 2 * (p + l);
     const luasDinding = keliling * t;
     
-    const volBeton = luasPlat * 0.12; 
-    const besi = volBeton * 100; 
+    // 1. Struktur
+    const volBeton = luasPlat * 0.12; // asumsi tebal 12cm
+    const besi = volBeton * 100; // asumsi 100kg/m3
     const biayaBeton = volBeton * hBeton;
     const biayaBesi = besi * hBesi;
     const totalStruktur = biayaBeton + biayaBesi;
 
-    const volDinding = luasDinding * 0.15; 
-    const semenD = volDinding * 6; 
-    const pasirD = volDinding * 0.8; 
+    // 2. Dinding (Rough Est)
+    const volDinding = luasDinding * 0.15; // tebal 15cm
+    const semenD = volDinding * 6; // 6 sak/m3
+    const pasirD = volDinding * 0.8; // 0.8 m3/m3
     const totalDinding = (semenD * hSemen) + (pasirD * hPasir);
 
+    // 3. Finishing
     const biayaKeramik = luasLantai * hKeramik;
-    const biayaCat = (luasDinding * 2 + luasLantai) * hCat; 
+    const biayaCat = (luasDinding * 2 + luasLantai) * hCat; // 2 sisi dinding + plafon
     const totalFinishing = biayaKeramik + biayaCat;
 
     const grandTotal = totalStruktur + totalDinding + totalFinishing;
@@ -336,10 +348,11 @@ function hitungBangunan() {
     if(elResDinding) elResDinding.innerText = formatRupiah(totalDinding);
     if(elResFinishing) elResFinishing.innerText = formatRupiah(totalFinishing);
     if(elResTotal) elResTotal.innerText = formatRupiah(grandTotal);
+
     updateDashboard();
 }
 
-// --- 8. PONDASI VISUAL (Sama seperti sebelumnya) ---
+// --- 8. PONDASI VISUAL ---
 function drawPondasi() {
     const elLA = document.getElementById('p-la');
     const elLB = document.getElementById('p-lb');
@@ -353,13 +366,15 @@ function drawPondasi() {
     const t = parseFloat(elT.value) || 70;
     const aan = elAan ? elAan.checked : false;
     
-    const s = 1.5; 
+    const s = 1.5; // scale
     const cx = 150; const by = 180;
     
     let svg = `<svg width="300" height="220">`;
     
+    // Tanah
     svg += `<rect x="0" y="${by}" width="300" height="20" fill="#8B4513" opacity="0.2"/>`;
     
+    // Pondasi
     const py = by;
     const topW = la * s; const botW = lb * s; const ponH = t * s;
     svg += `<polygon points="${cx-botW/2},${py} ${cx+botW/2},${py} ${cx+topW/2},${py-ponH} ${cx-topW/2},${py-ponH}" fill="#64748b" stroke="#334155"/>`;
@@ -381,9 +396,10 @@ function hitungPondasi() {
     const hSemen = parseFloat(document.getElementById('hp-semen').value);
 
     const vol = ((la + lb) / 2) * t * p;
-    const volBatu = vol * 0.7; 
-    const volSpesi = vol * 0.3; 
+    const volBatu = vol * 0.7; // 70% batu
+    const volSpesi = vol * 0.3; // 30% spesi
     
+    // Asumsi 1 sak semen = 0.024 m3 mortar
     const sakSemen = Math.ceil(volSpesi / 0.024);
 
     const biaya = (volBatu * hBatu) + (sakSemen * hSemen);
@@ -397,17 +413,23 @@ function hitungPondasi() {
     if(elBatu) elBatu.innerText = volBatu.toFixed(2) + " m³";
     if(elSemen) elSemen.innerText = sakSemen + " Sak";
     if(elTotal) elTotal.innerText = formatRupiah(biaya);
+
     updateDashboard();
 }
 
 // --- 9. AGGREGATOR & INIT ---
 function updateDashboard() {
+    // Get Elec Total
     const elecTotal = elecRows.reduce((acc, r) => acc + (r.qty * r.price), 0);
-    const denahTotal = rooms.reduce((acc, r) => acc + (r.p * r.l * r.cost), 0);
     
+    // Get Denah Total
+    const denahTotal = rooms.reduce((acc, r) => acc + (r.p * r.l * r.cost), 0);
+
+    // Get Building Total (Grab from DOM text)
     const bText = document.getElementById('res-total-bangunan') ? document.getElementById('res-total-bangunan').innerText : "Rp 0";
     const bTotal = parseRupiah(bText);
 
+    // Get Pondasi Total
     const pText = document.getElementById('res-total-pondasi') ? document.getElementById('res-total-pondasi').innerText : "Rp 0";
     const pTotal = parseRupiah(pText);
 
@@ -420,7 +442,23 @@ function updateDashboard() {
     if(elDashItems) elDashItems.innerText = rooms.length + elecRows.length;
 }
 
+// --- 10. PWA SERVICE WORKER REGISTRATION ---
 window.addEventListener('load', () => {
+    // 1. Register Service Worker
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js')
+            .then((registration) => {
+                console.log('✅ Service Worker Berhasil didaftar:', registration.scope);
+            })
+            .catch((error) => {
+                console.error('❌ Service Worker Gagal:', error);
+                // Tidak alert user agar UX lebih baik, cukup cek console
+            });
+    } else {
+        console.warn('⚠️ Browser ini tidak mendukung Service Worker.');
+    }
+
+    // 2. Init App Logic
     switchTab('dashboard');
     renderChecklist();
     drawDenah();
