@@ -5,36 +5,27 @@ function parseRupiah(str) {
     return parseInt(str.replace(/[^0-9]/g, '')) || 0;
 }
 
-// --- 2. NAVIGATION LOGIC (UPDATED FOR PRO THEME) ---
+// --- 2. NAVIGATION LOGIC ---
 function switchTab(tabId) {
-    // Hide all tabs
     document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-    // Show target tab
     const target = document.getElementById(tabId);
     if(target) target.classList.add('active');
     
-    // --- UPDATE BOTTOM NAV STYLES (Pro Version) ---
     document.querySelectorAll('.nav-btn-bottom').forEach(btn => {
-        // Reset style
         btn.classList.remove('text-white', 'font-bold');
         btn.classList.add('text-slate-500');
-        
-        // Set active style if button onclick contains tabId
         if(btn.onclick.toString().includes(tabId)) {
             btn.classList.remove('text-slate-500');
             btn.classList.add('text-white', 'font-bold');
         }
     });
 
-    // Refresh canvas if needed
     if(tabId === 'denah') drawDenah();
     if(tabId === 'pondasi') drawPondasi();
-    
-    // Load blog if switched to blog tab
-    if(tabId === 'blog') loadBlog();
+    if(tabId === 'blog') loadBlog(); // Load blog saat tab dibuka
 }
 
-// --- 3. BLOG FETCH LOGIC ---
+// --- 3. BLOG FETCH LOGIC (UPDATED: CATEGORIES) ---
 async function loadBlog() {
     const loadingEl = document.getElementById('blog-loading');
     const containerEl = document.getElementById('blog-container');
@@ -42,42 +33,77 @@ async function loadBlog() {
 
     if(!loadingEl || !containerEl) return;
 
-    // Reset state
     loadingEl.classList.remove('hidden');
     containerEl.classList.add('hidden');
     errorEl.classList.add('hidden');
 
     try {
-        // Mengambil Feed JSON dari Blogger
-        const response = await fetch('https://alister10.blogspot.com/feeds/posts/default?alt=json&max-results=6');
+        // Fetch Feed
+        const response = await fetch('https://alister10.blogspot.com/feeds/posts/default?alt=json&max-results=9');
         
-        if (!response.ok) throw new Error('Gagal mengambil data');
+        if (!response.ok) throw new Error('Network Error');
         
         const data = await response.json();
         const posts = data.feed.entry;
 
         if (!posts || posts.length === 0) {
-            containerEl.innerHTML = '<p class="text-center text-slate-500 py-10">Belum ada artikel tersedia.</p>';
-            containerEl.classList.remove('hidden');
+            containerEl.innerHTML = '<div class="col-span-full text-center py-10 text-slate-400">Belum ada artikel.</div>';
         } else {
             containerEl.innerHTML = posts.map(post => {
-                // Ambil Judul
                 const title = post.title.$t;
-                // Ambil Link
                 const link = post.link.find(l => l.rel === 'alternate').href;
-                // Ambil Tanggal
                 const date = new Date(post.published.$t).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
-                // Ambil Konten & Bersihkan HTML
                 let content = post.content.$t;
-                const plainText = content.replace(/<[^>]*>?/gm, '').substring(0, 130) + '...';
+                const plainText = content.replace(/<[^>]*>?/gm, '').substring(0, 140) + '...';
+
+                // --- LOGIKA KATEGORI OTOMATIS ---
+                let categoryLabel = "Umum";
+                let categoryColor = "bg-slate-100 text-slate-600";
+
+                // 1. Cek Label Asli Blogger
+                if (post.category && post.category.length > 0) {
+                    categoryLabel = post.category[0].term;
+                    // Warna berdasarkan kategori (Custom mapping sederhana)
+                    const catLower = categoryLabel.toLowerCase();
+                    if(catLower.includes('listrik') || catLower.includes('teknik')) categoryColor = "bg-yellow-100 text-yellow-800 border-yellow-200";
+                    else if(catLower.includes('struktur') || catLower.includes('pondasi')) categoryColor = "bg-blue-100 text-blue-800 border-blue-200";
+                    else if(catLower.includes('cat') || catLower.includes('finishing')) categoryColor = "bg-pink-100 text-pink-800 border-pink-200";
+                    else if(catLower.includes('tips') || catLower.includes('tutorial')) categoryColor = "bg-green-100 text-green-800 border-green-200";
+                } 
+                // 2. Jika tidak ada label, tebak dari judul (Fallback)
+                else {
+                    const t = title.toLowerCase();
+                    if(t.includes('listrik') || t.includes('instalasi')) {
+                        categoryLabel = "Teknik Listrik";
+                        categoryColor = "bg-yellow-100 text-yellow-800 border-yellow-200";
+                    } else if(t.includes('pondasi') || t.includes('pond')) {
+                        categoryLabel = "Sipil Struktur";
+                        categoryColor = "bg-blue-100 text-blue-800 border-blue-200";
+                    } else if(t.includes('cat') || t.includes('cat')) {
+                        categoryLabel = "Tips Finishing";
+                        categoryColor = "bg-pink-100 text-pink-800 border-pink-200";
+                    }
+                }
+                // AKHIR LOGIKA KATEGORI
 
                 return `
-                    <article class="bg-white border border-slate-200 rounded-xl p-5 hover:shadow-md hover:border-[#0f172a] transition-all duration-300 flex flex-col h-full group">
-                        <h4 class="font-bold text-slate-800 mb-2 leading-tight text-lg group-hover:text-[#0f172a] transition-colors">${title}</h4>
-                        <p class="text-sm text-slate-500 mb-4 line-clamp-3 flex-grow">${plainText}</p>
-                        <div class="flex justify-between items-center mt-auto pt-3 border-t border-slate-100">
-                            <span class="text-xs text-slate-400 bg-slate-100 px-2 py-1 rounded-full">${date}</span>
-                            <a href="${link}" target="_blank" class="text-xs font-bold text-[#0f172a] hover:underline bg-slate-100 px-3 py-1.5 rounded-full transition-colors">Baca Selengkapnya</a>
+                    <article class="bg-white border border-slate-200 rounded-xl p-5 hover:shadow-lg hover:border-slate-400 transition-all duration-300 flex flex-col h-full group relative overflow-hidden">
+                        <!-- Badge Kategori -->
+                        <div class="absolute top-3 right-3 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-sm z-10 ${categoryColor}">
+                            ${categoryLabel}
+                        </div>
+
+                        <h4 class="font-bold text-slate-800 mb-3 pr-10 leading-tight text-lg group-hover:text-blue-600 transition-colors line-clamp-2">${title}</h4>
+                        <p class="text-sm text-slate-500 mb-4 flex-grow line-clamp-3 leading-relaxed">${plainText}</p>
+                        
+                        <div class="flex justify-between items-center mt-auto pt-4 border-t border-slate-100">
+                            <span class="text-xs text-slate-400 bg-slate-50 px-2 py-1.5 rounded-full font-medium flex items-center gap-1">
+                                <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 0a2 2 0 1 0-4 2 2 0 0 1-4 0M8 7a2 2 0 1 0-4 2 2 0 0 1-4 0"></path></svg>
+                                ${date}
+                            </span>
+                            <a href="${link}" target="_blank" class="text-xs font-bold bg-slate-800 text-white hover:bg-slate-700 px-4 py-2 rounded-lg transition-colors shadow-sm hover:shadow-md">
+                                Baca Selengkapnya
+                            </a>
                         </div>
                     </article>
                 `;
@@ -96,14 +122,12 @@ async function loadBlog() {
 
 // --- 4. DASHBOARD & CHECKLIST ---
 const defaultTasks = [
-    "Survei & Analisa Lokasi", "Pembersihan Lahan", "Pengukuran & Bouwplank", "Galian Pondasi", "Pasang Pondasi Batu Kali", 
-    "Pasang Sloof & Kolom Praktis", "Pasang Dinding Bata", "Pemasangan Rangka Atap", "Cor Plat Lantai", 
-    "Pemasangan Kusen, Pintu & Jendela", "Instalasi Listrik (Rough In)", "Instalasi Air Bersih", 
-    "Plester & Aci Dinding", "Pekerjaan Lantai Keramik", "Pengecatan Akhir", "Pembersihan Akhir & Serah Terima"
+    "Survei Lokasi", "Pembersihan Lahan", "Galian Pondasi", "Pasang Pondasi", 
+    "Pasang Sloof/Kolom", "Pasang Dinding", "Rangka Atap", "Plat Lantai", 
+    "Kusen & Pintu", "Instalasi Listrik", "Instalasi Air", "Plester & Aci", "Cat & Finishing"
 ];
 
-// Ganti Key LocalStorage agar tidak bentrok dengan versi gratis
-let tasks = JSON.parse(localStorage.getItem('alisterPro_tasks')) || defaultTasks.map(t => ({name: t, done: false}));
+let tasks = JSON.parse(localStorage.getItem('alisterUlt_tasks')) || defaultTasks.map(t => ({name: t, done: false}));
 
 function renderChecklist() {
     const container = document.getElementById('checklist-container');
@@ -111,14 +135,14 @@ function renderChecklist() {
     
     container.innerHTML = tasks.map((t, i) => `
         <div class="flex items-center p-3 bg-slate-50 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-100 transition-colors" onclick="toggleTask(${i})">
-            <div class="w-5 h-5 rounded border ${t.done ? 'bg-[#0f172a] border-[#0f172a]' : 'border-slate-300'} flex items-center justify-center mr-3 text-white text-xs shadow-sm transition-colors">
+            <div class="w-5 h-5 rounded border ${t.done ? 'bg-emerald-500 border-emerald-500' : 'border-slate-300'} flex items-center justify-center mr-3 text-white text-xs shadow-sm transition-all">
                 ${t.done ? '✓' : ''}
             </div>
             <span class="${t.done ? 'line-through text-slate-400' : 'text-slate-700 font-medium'}">${t.name}</span>
         </div>
     `).join('');
     updateProgress();
-    localStorage.setItem('alisterPro_tasks', JSON.stringify(tasks));
+    localStorage.setItem('alisterUlt_tasks', JSON.stringify(tasks));
 }
 
 function toggleTask(idx) {
@@ -145,9 +169,8 @@ function updateProgress() {
     if(elBar) elBar.style.width = pct + '%';
 }
 
-// --- 5. DENAH RUMAH ---
-// Ganti Key LocalStorage
-let rooms = JSON.parse(localStorage.getItem('alisterPro_rooms')) || [];
+// --- 5. DENAH ---
+let rooms = JSON.parse(localStorage.getItem('alisterUlt_rooms')) || [];
 const canvas = document.getElementById('blueprintCanvas');
 const ctx = canvas ? canvas.getContext('2d') : null;
 const SCALE = 20; 
@@ -178,23 +201,22 @@ function drawDenah() {
         totalLuas += luas;
         totalBiaya += biaya;
 
-        // Draw Room (Updated Colors for Pro: Slate Blues)
-        ctx.fillStyle = i % 2 === 0 ? '#cbd5e1' : '#94a3b8'; 
+        // Draw Room (Shades of Blue)
+        ctx.fillStyle = i % 2 === 0 ? '#bfdbfe' : '#93c5fd';
         ctx.fillRect(curX, curY, w, h);
-        ctx.strokeStyle = '#334155';
+        ctx.strokeStyle = '#1e3a8a';
         ctx.strokeRect(curX, curY, w, h);
         
         // Text
-        ctx.fillStyle = '#0f172a';
-        ctx.font = 'bold 10px sans-serif';
+        ctx.fillStyle = '#1e293b';
+        ctx.font = '10px sans-serif';
         ctx.fillText(r.name, curX + 5, curY + 15);
         ctx.fillText(`${r.p}x${r.l}`, curX + 5, curY + 28);
 
-        // Add to list
         if(list) {
             const li = document.createElement('li');
-            li.className = "flex justify-between border-b border-slate-200 py-2 text-slate-600";
-            li.innerHTML = `<span>${r.name} (${r.p}x${r.l})</span> <button onclick="delRoom(${i})" class="text-red-500 hover:text-red-700 text-xs font-bold ml-2">Hapus</button>`;
+            li.className = "flex justify-between border-b border-slate-200 py-2 text-sm";
+            li.innerHTML = `<span class="text-slate-700">${r.name} (${r.p}x${r.l})</span> <button onclick="delRoom(${i})" class="text-red-400 hover:text-red-600 font-medium text-xs ml-2">Hapus</button>`;
             list.appendChild(li);
         }
 
@@ -221,40 +243,38 @@ function addRoom() {
     const elCost = document.getElementById('room-cost');
 
     if(elP && elL && elCost && elName) {
-        const name = elName.value || "Ruang Utama";
+        const name = elName.value || "Ruang";
         const p = parseFloat(elP.value) || 0;
         const l = parseFloat(elL.value) || 0;
         const cost = parseFloat(elCost.value) || 0;
         
         if(p && l) {
             rooms.push({name, p, l, cost});
-            localStorage.setItem('alisterPro_rooms', JSON.stringify(rooms));
+            localStorage.setItem('alisterUlt_rooms', JSON.stringify(rooms));
             drawDenah();
         }
     }
 }
 
 function clearRooms() {
-    if(confirm("Hapus semua data denah ruangan?")) {
+    if(confirm("Hapus semua denah?")) {
         rooms = [];
-        localStorage.setItem('alisterPro_rooms', JSON.stringify(rooms));
+        localStorage.setItem('alisterUlt_rooms', JSON.stringify(rooms));
         drawDenah();
     }
 }
-
 function delRoom(idx) {
     rooms.splice(idx,1);
-    localStorage.setItem('alisterPro_rooms', JSON.stringify(rooms));
+    localStorage.setItem('alisterUlt_rooms', JSON.stringify(rooms));
     drawDenah();
 }
 
 // --- 6. INSTALASI LISTRIK ---
-// Ganti Key LocalStorage
-let elecRows = JSON.parse(localStorage.getItem('alisterPro_elec')) || [
+let elecRows = JSON.parse(localStorage.getItem('alisterUlt_elec')) || [
     {name: "Kabel NYM 3x2.5mm", qty: 50, price: 12000},
     {name: "Stop Kontak Listrik", qty: 10, price: 25000},
-    {name: "Saklar Tunggal 1 Gang", qty: 8, price: 15000},
-    {name: "Lampu LED Philips", qty: 8, price: 35000}
+    {name: "Saklar 1 Gang", qty: 8, price: 15000},
+    {name: "Lampu LED", qty: 8, price: 35000}
 ];
 
 function renderElecTable() {
@@ -263,11 +283,11 @@ function renderElecTable() {
     
     tbody.innerHTML = elecRows.map((r, i) => `
         <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-            <td class="p-3"><input type="text" value="${r.name}" onchange="updateElec(${i}, 'name', this.value)" class="w-full border border-slate-200 p-2 rounded text-sm focus:border-[#0f172a] focus:outline-none"></td>
-            <td class="p-3"><input type="number" value="${r.qty}" onchange="updateElec(${i}, 'qty', this.value)" class="w-full border border-slate-200 p-2 rounded text-sm focus:border-[#0f172a] focus:outline-none"></td>
-            <td class="p-3"><input type="number" value="${r.price}" onchange="updateElec(${i}, 'price', this.value)" class="w-full border border-slate-200 p-2 rounded text-sm focus:border-[#0f172a] focus:outline-none"></td>
+            <td class="p-3"><input type="text" value="${r.name}" onchange="updateElec(${i}, 'name', this.value)" class="w-full border border-slate-200 p-2 rounded text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 outline-none"></td>
+            <td class="p-3"><input type="number" value="${r.qty}" onchange="updateElec(${i}, 'qty', this.value)" class="w-full border border-slate-200 p-2 rounded text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 outline-none"></td>
+            <td class="p-3"><input type="number" value="${r.price}" onchange="updateElec(${i}, 'price', this.value)" class="w-full border border-slate-200 p-2 rounded text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 outline-none"></td>
             <td class="p-3 font-bold text-slate-700">${formatRupiah(r.qty * r.price)}</td>
-            <td class="p-3 text-center"><button onclick="delElecRow(${i})" class="text-slate-400 hover:text-red-500 transition-colors">X</button></td>
+            <td class="p-3 text-center"><button onclick="delElecRow(${i})" class="text-slate-400 hover:text-red-500 transition-colors w-8 h-8 rounded-full hover:bg-red-50 flex items-center justify-center">✕</button></td>
         </tr>
     `).join('');
     calcElecTotal();
@@ -275,19 +295,19 @@ function renderElecTable() {
 
 function addElecRow() {
     elecRows.push({name: "Item Baru", qty: 1, price: 0});
-    localStorage.setItem('alisterPro_elec', JSON.stringify(elecRows));
+    localStorage.setItem('alisterUlt_elec', JSON.stringify(elecRows));
     renderElecTable();
 }
 
 function updateElec(idx, field, val) {
     elecRows[idx][field] = field === 'name' ? val : parseFloat(val);
-    localStorage.setItem('alisterPro_elec', JSON.stringify(elecRows));
+    localStorage.setItem('alisterUlt_elec', JSON.stringify(elecRows));
     renderElecTable();
 }
 
 function delElecRow(idx) {
     elecRows.splice(idx,1);
-    localStorage.setItem('alisterPro_elec', JSON.stringify(elecRows));
+    localStorage.setItem('alisterUlt_elec', JSON.stringify(elecRows));
     renderElecTable();
 }
 
@@ -317,27 +337,26 @@ function hitungBangunan() {
     const t = elTinggi ? parseFloat(elTinggi.value) : 0;
     const luasPlat = elLuasPlat ? parseFloat(elLuasPlat.value) : 0;
 
-    // Estimasi Sederhana
     const luasLantai = p * l;
     const keliling = 2 * (p + l);
     const luasDinding = keliling * t;
     
     // 1. Struktur
-    const volBeton = luasPlat * 0.12; // asumsi tebal 12cm
-    const besi = volBeton * 100; // asumsi 100kg/m3
+    const volBeton = luasPlat * 0.12; 
+    const besi = volBeton * 100; 
     const biayaBeton = volBeton * hBeton;
     const biayaBesi = besi * hBesi;
     const totalStruktur = biayaBeton + biayaBesi;
 
     // 2. Dinding (Rough Est)
-    const volDinding = luasDinding * 0.15; // tebal 15cm
-    const semenD = volDinding * 6; // 6 sak/m3
-    const pasirD = volDinding * 0.8; // 0.8 m3/m3
+    const volDinding = luasDinding * 0.15; 
+    const semenD = volDinding * 6; 
+    const pasirD = volDinding * 0.8; 
     const totalDinding = (semenD * hSemen) + (pasirD * hPasir);
 
     // 3. Finishing
     const biayaKeramik = luasLantai * hKeramik;
-    const biayaCat = (luasDinding * 2 + luasLantai) * hCat; // 2 sisi dinding + plafon
+    const biayaCat = (luasDinding * 2 + luasLantai) * hCat; 
     const totalFinishing = biayaKeramik + biayaCat;
 
     const grandTotal = totalStruktur + totalDinding + totalFinishing;
@@ -369,15 +388,15 @@ function drawPondasi() {
     const t = parseFloat(elT.value) || 70;
     const aan = elAan ? elAan.checked : false;
     
-    const s = 1.5; // scale
+    const s = 1.5; 
     const cx = 150; const by = 180;
     
     let svg = `<svg width="300" height="220">`;
     
     // Tanah
-    svg += `<rect x="0" y="${by}" width="300" height="20" fill="#57534e" opacity="0.1"/>`; // Sedikit lebih gelap tanah
+    svg += `<rect x="0" y="${by}" width="300" height="20" fill="#57534e" opacity="0.15"/>`;
     
-    // Pondasi (Pro Color: Slate 600)
+    // Pondasi
     const py = by;
     const topW = la * s; const botW = lb * s; const ponH = t * s;
     svg += `<polygon points="${cx-botW/2},${py} ${cx+botW/2},${py} ${cx+topW/2},${py-ponH} ${cx-topW/2},${py-ponH}" fill="#475569" stroke="#1e293b"/>`;
@@ -399,10 +418,9 @@ function hitungPondasi() {
     const hSemen = parseFloat(document.getElementById('hp-semen').value);
 
     const vol = ((la + lb) / 2) * t * p;
-    const volBatu = vol * 0.7; // 70% batu
-    const volSpesi = vol * 0.3; // 30% spesi
+    const volBatu = vol * 0.7; 
+    const volSpesi = vol * 0.3; 
     
-    // Asumsi 1 sak semen = 0.024 m3 mortar
     const sakSemen = Math.ceil(volSpesi / 0.024);
 
     const biaya = (volBatu * hBatu) + (sakSemen * hSemen);
@@ -420,7 +438,7 @@ function hitungPondasi() {
     updateDashboard();
 }
 
-// --- 9. AGGREGATOR ---
+// --- 9. AGGREGATOR & INIT ---
 function updateDashboard() {
     // Get Elec Total
     const elecTotal = elecRows.reduce((acc, r) => acc + (r.qty * r.price), 0);
@@ -445,17 +463,23 @@ function updateDashboard() {
     if(elDashItems) elDashItems.innerText = rooms.length + elecRows.length;
 }
 
-// --- 10. PWA SERVICE WORKER REGISTRATION ---
+// --- 10. PWA SERVICE WORKER REGISTRATION (DEBUGGING) ---
 window.addEventListener('load', () => {
+    console.log('[INIT] Memuat Aplikasi Alister Ultimate...');
+    
     // 1. Register Service Worker
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('./sw.js')
             .then((registration) => {
-                console.log('✅ Alister Engineering Pro: Service Worker Berhasil didaftar.', registration.scope);
+                console.log('[INIT] ✅ Service Worker Berhasil didaftar:', registration.scope);
+                console.log('[INIT] Scope:', registration.scope);
             })
             .catch((error) => {
-                console.error('❌ Service Worker Gagal:', error);
+                console.error('[INIT] ❌ Service Worker Gagal:', error);
+                alert("Error Service Worker. Pastikan file sw.js ada.");
             });
+    } else {
+        console.warn('[INIT] ⚠️ Browser ini tidak mendukung Service Worker (PWA tidak bisa diinstal).');
     }
 
     // 2. Init App Logic
