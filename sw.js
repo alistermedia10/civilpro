@@ -1,45 +1,45 @@
-const CACHE_NAME = 'civilpro-v1';
+const CACHE_NAME = 'alister-ult-v3'; // Versi cache dinaikkan
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
   './script.js',
-  'https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4' // Cache CSS Tailwind agar offline tetap rapi
+  './icon-192.png',
+  './icon-512.png',
+  'https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4'
 ];
 
-// Install Event: Menyimpan aset ke cache
+// Install: Cache file penting
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        console.log('Service Worker: Membuka Cache');
+        console.log('[SW] Menginstall Cache Alister Ultimate...');
         return cache.addAll(ASSETS_TO_CACHE);
       })
       .catch((error) => {
-        console.error('Service Worker: Gagal cache', error);
+        console.error('[SW] Gagal Cache:', error);
       })
   );
-  self.skipWaiting(); // Aktifkan SW baru segera
+  // PENTING: Paksa browser mengaktifkan SW baru segera
+  self.skipWaiting();
 });
 
-// Fetch Event: Mengambil data dari cache dulu (Offline First)
+// Fetch: Ambil dari dulu (Offline First), lalu network
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request)
       .then((cachedResponse) => {
-        // Jika ada di cache, kembalikan
         if (cachedResponse) {
           return cachedResponse;
         }
 
-        // Jika tidak ada, ambil dari network
         return fetch(event.request).then((networkResponse) => {
           // Cek response valid
           if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
             return networkResponse;
           }
 
-          // Clone response karena stream hanya bisa dibaca sekali
           const responseToCache = networkResponse.clone();
 
           caches.open(CACHE_NAME)
@@ -50,14 +50,10 @@ self.addEventListener('fetch', (event) => {
           return networkResponse;
         });
       })
-      .catch((error) => {
-        console.log('Service Worker: Fetch failed; offline?', error);
-        // Opsional: Return halaman offline custom jika diinginkan
-      })
   );
 });
 
-// Activate Event: Membersihkan cache lama
+// Activate: Hapus cache lama
 self.addEventListener('activate', (event) => {
   const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
@@ -65,6 +61,7 @@ self.addEventListener('activate', (event) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
           if (cacheWhitelist.indexOf(cacheName) === -1) {
+            console.log('[SW] Menghapus cache lama:', cacheName);
             return caches.delete(cacheName);
           }
         })
