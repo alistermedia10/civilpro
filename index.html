@@ -3,85 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Alister Engineering - Aplikasi Sipil Terpadu</title>
+    <title>Alister Engineering Pro</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --primary: #2563eb;
-            --secondary: #475569;
-            --accent: #f59e0b;
+            --primary: #0f172a; /* Slate 900 - Professional Dark */
+            --accent: #f59e0b;  /* Amber 500 - Gold/Pro Accent */
+        --secondary: #334155;
+        --bg-body: #f8fafc;
+        --text-main: #1e293b;
+        --text-light: #64748b;
+        --success: #059669;
+            --danger: #dc2626;
         }
-        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-body); -webkit-tap-highlight-color: transparent; }
         
-        /* Hide scrollbar for horizontal scrolling */
+        /* Hide scrollbar */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none;  scrollbar-width: none; }
 
-        /* Smooth fade transition */
-        .tab-content { display: none; animation: fadeIn 0.3s ease-in-out; }
+        /* Transitions */
+        .tab-content { display: none; animation: slideUp 0.3s ease-out; }
         .tab-content.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity:1; transform: translateY(0); } }
 
         /* Print Styles */
         @media print {
             .no-print { display: none !important; }
-            body { background: white; padding-bottom: 0 !important; } /* Disable padding print */
+            body { background: white; padding-bottom: 0 !important; }
             .tab-content { display: block !important; page-break-after: always; }
             .tab-content:last-child { page-break-after: auto; }
-            #bottom-nav { display: none !important; } /* Hide footer on print */
+            #bottom-nav { display: none !important; }
+            header { box-shadow: none !important; }
         }
+
+        /* Custom Scrollbar for nice look on desktop */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
-<body class="text-slate-800 pb-20"> <!-- TAMBAHAN: pb-20 untuk space footer -->
+<body class="text-slate-800">
 
-    <!-- HEADER (Logo Only) -->
-    <header class="bg-white shadow-md sticky top-0 z-40 no-print">
+    <!-- HEADER PRO (Dark Theme) -->
+    <header class="bg-[#0f172a] shadow-lg sticky top-0 z-40 no-print border-b border-slate-700">
         <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-            <div class="flex items-center gap-2">
-<img src="logo.png" alt="Logo CivilPro" class="h-10 w-10 rounded-lg object-contain">
-              
+            <div class="flex items-center gap-3">
+                <!-- Logo Image Placeholder (Pastikan file icon-192.png ada) -->
+                <!-- Jika menggunakan gambar: <img src="icon-192.png" ... -->
+                <div class="w-10 h-10 bg-gradient-to-br from-slate-700 to-slate-900 rounded-lg flex items-center justify-center text-white shadow-inner border border-slate-600">
+                    <span class="font-bold text-lg">AE</span>
+                </div>
                 <div>
-                    <h1 class="text-lg font-bold text-slate-800 leading-none">Alister Engineering</h1>
-                    <span class="text-xs text-slate-500">Aplikasi Sipil Terpadu</span>
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-lg md:text-xl font-bold text-white tracking-tight leading-none">Alister Engineering</h1>
+                        <span class="bg-[#f59e0b] text-[10px] font-bold text-white px-1.5 py-0.5 rounded shadow-sm uppercase tracking-wider">PRO</span>
+                    </div>
+                    <span class="text-xs text-slate-400 font-medium tracking-wide">Sistem Estimasi & Perhitungan Sipil</span>
                 </div>
             </div>
-            <button onclick="window.print()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-2 rounded-lg text-sm font-medium transition">
-                🖨️
+            <button onclick="window.print()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-2 rounded-lg text-sm font-medium transition border border-slate-600">
+                🖨️ Cetak Laporan
             </button>
         </div>
     </header>
 
-    <!-- MAIN CONTENT -->
-    <main class="max-w-7xl mx-auto p-4 space-y-6">
+    <main class="max-w-7xl mx-auto p-4 pb-20 space-y-6">
 
         <!-- 1. DASHBOARD -->
         <section id="dashboard" class="tab-content active">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
-                    <p class="text-sm text-slate-500 font-medium">Total Biaya RAB</p>
-                    <h2 class="text-2xl font-bold text-blue-600 mt-1" id="dash-total">Rp 0</h2>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 relative overflow-hidden group">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-[#0f172a]"></div>
+                    <p class="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">Total Estimasi</p>
+                    <h2 class="text-2xl font-bold text-slate-800 mt-1 truncate" id="dash-total">Rp 0</h2>
                 </div>
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
-                    <p class="text-sm text-slate-500 font-medium">Progress Pekerjaan</p>
-                    <h2 class="text-2xl font-bold text-green-600 mt-1" id="dash-progress">0%</h2>
-                    <div class="w-full bg-slate-100 rounded-full h-2 mt-3">
-                        <div class="bg-green-500 h-2 rounded-full" style="width: 0%" id="dash-progress-bar"></div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-[#f59e0b]"></div>
+                    <p class="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">Progress</p>
+                    <div class="flex items-end gap-2">
+                        <h2 class="text-2xl font-bold text-slate-800 leading-none" id="dash-progress">0%</h2>
+                        <span class="text-xs text-slate-400 mb-1.5">Selesai</span>
+                    </div>
+                    <div class="w-full bg-slate-100 rounded-full h-2 mt-2">
+                        <div class="bg-[#f59e0b] h-2 rounded-full transition-all duration-500" style="width: 0%" id="dash-progress-bar"></div>
                     </div>
                 </div>
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
-                    <p class="text-sm text-slate-500 font-medium">Item Material</p>
-                    <h2 class="text-2xl font-bold text-orange-500 mt-1" id="dash-items">0</h2>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-blue-600"></div>
+                    <p class="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">Item Aktif</p>
+                    <h2 class="text-2xl font-bold text-slate-800 mt-1" id="dash-items">0</h2>
                 </div>
             </div>
 
-            <div class="bg-white rounded-xl shadow-sm p-6 border border-slate-100">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="font-bold text-lg">Checklist Proyek</h3>
-                    <button onclick="resetChecklist()" class="text-xs text-red-500 hover:underline">Reset Checklist</button>
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="font-bold text-slate-800 text-lg flex items-center gap-2">
+                        📋 Checklist Pekerjaan Proyek
+                    </h3>
+                    <button onclick="resetChecklist()" class="text-xs text-slate-400 hover:text-red-500 font-medium transition">Reset Checklist</button>
                 </div>
                 <div id="checklist-container" class="space-y-2"></div>
             </div>
@@ -91,36 +116,44 @@
         <section id="denah" class="tab-content">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div class="lg:col-span-2 space-y-4">
-                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
-                        <h3 class="font-bold text-lg mb-4">Input Ruangan</h3>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                        <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">📐 Input Ruangan</h3>
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <input type="text" id="room-name" placeholder="Nama Ruang" class="border p-2 rounded-lg w-full text-sm">
-                            <input type="number" id="room-p" placeholder="Panjang (m)" class="border p-2 rounded-lg w-full text-sm">
-                            <input type="number" id="room-l" placeholder="Lebar (m)" class="border p-2 rounded-lg w-full text-sm">
-                            <input type="number" id="room-cost" placeholder="Biaya /m²" class="border p-2 rounded-lg w-full text-sm" value="3500000">
+                            <input type="text" id="room-name" placeholder="Nama Ruang" class="border-slate-300 focus:border-[#0f172a] focus:ring-1 focus:ring-[#0f172a]/20 p-2.5 rounded-lg w-full text-sm transition">
+                            <input type="number" id="room-p" placeholder="Panjang (m)" class="border-slate-300 focus:border-[#0f172a] focus:ring-1 focus:ring-[#0f172a]/20 p-2.5 rounded-lg w-full text-sm transition">
+                            <input type="number" id="room-l" placeholder="Lebar (m)" class="border-slate-300 focus:border-[#0f172a] focus:ring-1 focus:ring-[#0f172a]/20 p-2.5 rounded-lg w-full text-sm transition">
+                            <input type="number" id="room-cost" placeholder="Biaya /m²" class="border-slate-300 focus:border-[#0f172a] focus:ring-1 focus:ring-[#0f172a]/20 p-2.5 rounded-lg w-full text-sm transition font-medium text-slate-700" value="3500000">
                         </div>
-                        <div class="mt-3 flex gap-2">
-                            <button onclick="addRoom()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700">➕ Tambah</button>
-                            <button onclick="clearRooms()" class="bg-slate-200 text-slate-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-300">Reset</button>
+                        <div class="mt-4 flex gap-3">
+                            <button onclick="addRoom()" class="flex-1 bg-[#0f172a] hover:bg-slate-800 text-white px-4 py-2.5 rounded-lg text-sm font-semibold shadow-md hover:shadow-lg transition-all transform active:scale-95">➕ Tambah Ruang</button>
+                            <button onclick="clearRooms()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors">Reset Denah</button>
                         </div>
                     </div>
-                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
-                        <h3 class="font-bold mb-2">Visual Denah</h3>
-                        <div class="border border-dashed border-slate-300 bg-slate-50 rounded-lg flex justify-center items-center overflow-auto h-[300px]">
+                    
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                        <h3 class="font-bold mb-2 text-slate-700">Visual Denah (2D)</h3>
+                        <div class="border border-slate-200 bg-slate-50 rounded-lg flex justify-center items-center overflow-auto h-[320px] shadow-inner">
                             <canvas id="blueprintCanvas" width="600" height="300"></canvas>
                         </div>
                     </div>
                 </div>
+
                 <div class="space-y-4">
-                    <div class="bg-blue-50 p-6 rounded-xl border border-blue-100">
-                        <h3 class="font-bold text-blue-800 mb-2">Rangkuman Denah</h3>
-                        <div class="space-y-2 text-sm">
-                            <div class="flex justify-between"><span>Total Luas:</span> <span class="font-bold" id="denah-luas">0 m²</span></div>
-                            <div class="flex justify-between"><span>Total Biaya:</span> <span class="font-bold text-blue-700" id="denah-biaya">Rp 0</span></div>
+                    <div class="bg-slate-50 border border-slate-200 p-6 rounded-xl">
+                        <h3 class="font-bold text-slate-800 mb-4">Ringkasan Denah</h3>
+                        <div class="space-y-3 text-sm">
+                            <div class="flex justify-between items-center p-2 bg-white rounded-lg shadow-sm">
+                                <span class="text-slate-500">Total Luas Bangunan</span>
+                                <span class="font-bold text-slate-800" id="denah-luas">0 m²</span>
+                            </div>
+                            <div class="flex justify-between items-center p-2 bg-white rounded-lg shadow-sm">
+                                <span class="text-slate-500">Estimasi Biaya Denah</span>
+                                <span class="font-bold text-[#f59e0b]" id="denah-biaya">Rp 0</span>
+                            </div>
                         </div>
                     </div>
-                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 max-h-[250px] overflow-y-auto">
-                        <h3 class="font-bold text-sm mb-2">Daftar Ruangan</h3>
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 max-h-[300px] overflow-y-auto">
+                        <h3 class="font-bold text-sm mb-3 border-b pb-2 text-slate-700">Daftar Ruangan</h3>
                         <ul id="room-list" class="text-sm space-y-1"></ul>
                     </div>
                 </div>
@@ -129,25 +162,30 @@
 
         <!-- 3. LISTRIK -->
         <section id="listrik" class="tab-content">
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 mb-6">
-                <h3 class="font-bold text-lg mb-4">📋 RAB Instalasi Listrik</h3>
-                <div class="overflow-x-auto">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 mb-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="font-bold text-slate-800 text-lg">⚡ RAB Instalasi Listrik</h3>
+                </div>
+                <div class="overflow-x-auto rounded-lg border border-slate-200">
                     <table class="w-full text-sm text-left">
                         <thead class="text-xs text-slate-500 uppercase bg-slate-50">
                             <tr>
-                                <th class="px-4 py-3">Item Material</th>
-                                <th class="px-4 py-3 w-24">Jumlah</th>
-                                <th class="px-4 py-3 w-32">Harga Satuan</th>
-                                <th class="px-4 py-3 w-32">Total</th>
-                                <th class="px-4 py-3 w-10"></th>
+                                <th class="px-4 py-3 font-semibold">Item Material</th>
+                                <th class="px-4 py-3 w-24 font-semibold">Jumlah</th>
+                                <th class="px-4 py-3 w-32 font-semibold">Harga Satuan</th>
+                                <th class="px-4 py-3 w-32 font-semibold">Total</th>
+                                <th class="px-4 py-3 w-10 font-semibold"></th>
                             </tr>
                         </thead>
                         <tbody id="elec-table-body"></tbody>
                     </table>
                 </div>
-                <button onclick="addElecRow()" class="mt-4 text-blue-600 text-sm font-medium hover:underline">+ Tambah Baris</button>
-                <div class="mt-4 pt-4 border-t flex justify-end">
-                    <span class="text-lg font-bold">Total: <span id="elec-total" class="text-blue-600">Rp 0</span></span>
+                <button onclick="addElecRow()" class="mt-4 flex items-center gap-2 text-slate-600 text-sm font-medium hover:text-[#0f172a] transition">
+                    <span class="bg-slate-200 w-5 h-5 rounded flex items-center justify-center text-[10px]">+</span> Tambah Item Material
+                </button>
+                <div class="mt-4 pt-4 border-t border-slate-100 flex justify-end items-center bg-slate-50 rounded-lg p-4">
+                    <span class="text-sm text-slate-500 mr-4">Total Estimasi Listrik:</span>
+                    <span class="text-xl font-bold text-slate-800" id="elec-total">Rp 0</span>
                 </div>
             </div>
         </section>
@@ -155,41 +193,63 @@
         <!-- 4. BANGUNAN -->
         <section id="bangunan" class="tab-content">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="space-y-4">
-                    <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-100">
-                        <h4 class="font-bold text-slate-700 mb-3 border-b pb-2">1. Dimensi & Struktur</h4>
-                        <div class="grid grid-cols-2 gap-3 text-sm">
-                            <label class="block">Panjang (m)<input type="number" id="b-panjang" class="w-full border p-2 rounded mt-1" value="10"></label>
-                            <label class="block">Lebar (m)<input type="number" id="b-lebar" class="w-full border p-2 rounded mt-1" value="8"></label>
-                            <label class="block">Tinggi Dinding (m)<input type="number" id="b-tinggi" class="w-full border p-2 rounded mt-1" value="3"></label>
-                            <label class="block">Luas Plat Beton (m²)<input type="number" id="b-luas-plat" class="w-full border p-2 rounded mt-1" value="0"></label>
+                <div class="space-y-5">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                        <h4 class="font-bold text-slate-800 mb-4 flex items-center gap-2 pb-2 border-b border-slate-100">
+                            <span>🏗️</span> 1. Dimensi & Struktur
+                        </h4>
+                        <div class="grid grid-cols-2 gap-4 text-sm">
+                            <label class="block text-slate-600 font-medium">Panjang (m)<input type="number" id="b-panjang" class="w-full border-slate-300 focus:border-[#0f172a] focus:ring-1 focus:ring-[#0f172a]/20 p-2.5 rounded-lg mt-1 transition" value="10"></label>
+                            <label class="block text-slate-600 font-medium">Lebar (m)<input type="number" id="b-lebar" class="w-full border-slate-300 focus:border-[#0f172a] focus:ring-1 focus:ring-[#0f172a]/20 p-2.5 rounded-lg mt-1 transition" value="8"></label>
+                            <label class="block text-slate-600 font-medium">Tinggi Dinding (m)<input type="number" id="b-tinggi" class="w-full border-slate-300 focus:border-[#0f172a] focus:ring-1 focus:ring-[#0f172a]/20 p-2.5 rounded-lg mt-1 transition" value="3"></label>
+                            <label class="block text-slate-600 font-medium">Luas Plat Beton (m²)<input type="number" id="b-luas-plat" class="w-full border-slate-300 focus:border-[#0f172a] focus:ring-1 focus:ring-[#0f172a]/20 p-2.5 rounded-lg mt-1 transition" value="0"></label>
                         </div>
                     </div>
-                    <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-100">
-                        <h4 class="font-bold text-slate-700 mb-3 border-b pb-2">2. Harga Material</h4>
-                        <div class="grid grid-cols-2 gap-3 text-sm">
-                            <label class="block">Beton /m³ <input type="number" id="h-beton" class="w-full border p-2 rounded mt-1" value="900000"></label>
-                            <label class="block">Besi /kg <input type="number" id="h-besi" class="w-full border p-2 rounded mt-1" value="15000"></label>
-                            <label class="block">Semen /sak <input type="number" id="h-semen" class="w-full border p-2 rounded mt-1" value="65000"></label>
-                            <label class="block">Pasir /m³ <input type="number" id="h-pasir" class="w-full border p-2 rounded mt-1" value="350000"></label>
+
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                        <h4 class="font-bold text-slate-800 mb-4 flex items-center gap-2 pb-2 border-b border-slate-100">
+                            <span>💰</span> 2. Harga Material (Update)
+                        </h4>
+                        <div class="grid grid-cols-2 gap-4 text-sm">
+                            <label class="block text-slate-600 font-medium">Beton /m³ <input type="number" id="h-beton" class="w-full border-slate-300 focus:border-[#0f172a] focus:ring-1 focus:ring-[#0f172a]/20 p-2.5 rounded-lg mt-1 transition" value="900000"></label>
+                            <label class="block text-slate-600 font-medium">Besi /kg <input type="number" id="h-besi" class="w-full border-slate-300 focus:border-[#0f172a] focus:ring-1 focus:ring-[#0f172a]/20 p-2.5 rounded-lg mt-1 transition" value="15000"></label>
+                            <label class="block text-slate-600 font-medium">Semen /sak <input type="number" id="h-semen" class="w-full border-slate-300 focus:border-[#0f172a] focus:ring-1 focus:ring-[#0f172a]/20 p-2.5 rounded-lg mt-1 transition" value="65000"></label>
+                            <label class="block text-slate-600 font-medium">Pasir /m³ <input type="number" id="h-pasir" class="w-full border-slate-300 focus:border-[#0f172a] focus:ring-1 focus:ring-[#0f172a]/20 p-2.5 rounded-lg mt-1 transition" value="350000"></label>
                         </div>
                     </div>
-                    <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-100">
-                        <h4 class="font-bold text-slate-700 mb-3 border-b pb-2">3. Finishing</h4>
-                        <div class="grid grid-cols-2 gap-3 text-sm">
-                            <label class="block">Keramik (Rp/m²)<input type="number" id="h-keramik" class="w-full border p-2 rounded mt-1" value="150000"></label>
-                            <label class="block">Cat (Rp/m²)<input type="number" id="h-cat" class="w-full border p-2 rounded mt-1" value="45000"></label>
+
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                        <h4 class="font-bold text-slate-800 mb-4 flex items-center gap-2 pb-2 border-b border-slate-100">
+                            <span>🎨</span> 3. Finishing
+                        </h4>
+                        <div class="grid grid-cols-2 gap-4 text-sm">
+                            <label class="block text-slate-600 font-medium">Keramik (Rp/m²)<input type="number" id="h-keramik" class="w-full border-slate-300 focus:border-[#0f172a] focus:ring-1 focus:ring-[#0f172a]/20 p-2.5 rounded-lg mt-1 transition" value="150000"></label>
+                            <label class="block text-slate-600 font-medium">Cat (Rp/m²)<input type="number" id="h-cat" class="w-full border-slate-300 focus:border-[#0f172a] focus:ring-1 focus:ring-[#0f172a]/20 p-2.5 rounded-lg mt-1 transition" value="45000"></label>
                         </div>
                     </div>
-                    <button onclick="hitungBangunan()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold shadow hover:bg-blue-700 transition">Hitung RAB Bangunan</button>
+
+                    <button onclick="hitungBangunan()" class="w-full bg-[#0f172a] hover:bg-slate-800 text-white py-3.5 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all transform active:scale-[0.98]">🧮 Hitung RAB Bangunan</button>
                 </div>
-                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-100">
-                    <h3 class="font-bold text-lg mb-4">Hasil Perhitungan</h3>
-                    <div class="space-y-4 text-sm">
-                        <div class="flex justify-between border-b pb-2"><span>Struktur (Beton + Besi)</span> <span class="font-bold" id="res-struktur">-</span></div>
-                        <div class="flex justify-between border-b pb-2"><span>Dinding & Pondasi (Est)</span> <span class="font-bold" id="res-dinding">-</span></div>
-                        <div class="flex justify-between border-b pb-2"><span>Finishing (Lantai + Cat)</span> <span class="font-bold" id="res-finishing">-</span></div>
-                        <div class="flex justify-between pt-2 text-base"><span class="font-bold text-blue-800">Total Bangunan</span> <span class="font-bold text-blue-800 text-xl" id="res-total-bangunan">Rp 0</span></div>
+
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 h-fit">
+                    <h3 class="font-bold text-slate-800 mb-6 text-lg">Hasil Perhitungan</h3>
+                    <div class="space-y-5 text-sm">
+                        <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+                            <span class="text-slate-600">Struktur (Beton + Besi)</span>
+                            <span class="font-bold text-slate-800 text-lg" id="res-struktur">-</span>
+                        </div>
+                        <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+                            <span class="text-slate-600">Dinding & Pondasi (Estimasi)</span>
+                            <span class="font-bold text-slate-800 text-lg" id="res-dinding">-</span>
+                        </div>
+                        <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+                            <span class="text-slate-600">Finishing (Lantai + Cat)</span>
+                            <span class="font-bold text-slate-800 text-lg" id="res-finishing">-</span>
+                        </div>
+                        <div class="flex justify-between items-center pt-4 bg-slate-50 rounded-lg px-4">
+                            <span class="font-bold text-[#0f172a] text-base">Total Bangunan</span>
+                            <span class="font-bold text-[#0f172a] text-2xl" id="res-total-bangunan">Rp 0</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -198,108 +258,123 @@
         <!-- 5. PONDASI VISUAL -->
         <section id="pondasi" class="tab-content">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="space-y-4">
-                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
-                        <h3 class="font-bold text-lg mb-4">Data Pondasi</h3>
-                        <div class="grid grid-cols-3 gap-3 mb-4">
-                            <div><label class="text-xs text-slate-500">L Atas (cm)</label><input type="number" id="p-la" class="w-full border p-2 rounded" value="30"></div>
-                            <div><label class="text-xs text-slate-500">L Bawah (cm)</label><input type="number" id="p-lb" class="w-full border p-2 rounded" value="60"></div>
-                            <div><label class="text-xs text-slate-500">Tinggi (cm)</label><input type="number" id="p-t" class="w-full border p-2 rounded" value="70"></div>
+                <div class="space-y-5">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                        <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">🪨 Data Pondasi</h3>
+                        <div class="grid grid-cols-3 gap-4 mb-4">
+                            <div><label class="text-xs text-slate-500 font-bold uppercase">L Atas (cm)</label><input type="number" id="p-la" class="w-full border-slate-300 focus:border-[#0f172a] focus:ring-1 focus:ring-[#0f172a]/20 p-2.5 rounded-lg mt-1 transition" value="30"></div>
+                            <div><label class="text-xs text-slate-500 font-bold uppercase">L Bawah (cm)</label><input type="number" id="p-lb" class="w-full border-slate-300 focus:border-[#0f172a] focus:ring-1 focus:ring-[#0f172a]/20 p-2.5 rounded-lg mt-1 transition" value="60"></div>
+                            <div><label class="text-xs text-slate-500 font-bold uppercase">Tinggi (cm)</label><input type="number" id="p-t" class="w-full border-slate-300 focus:border-[#0f172a] focus:ring-1 focus:ring-[#0f172a]/20 p-2.5 rounded-lg mt-1 transition" value="70"></div>
                         </div>
-                        <div class="mb-4"><label class="text-xs text-slate-500">Panjang Pondasi (m)</label><input type="number" id="p-p" class="w-full border p-2 rounded" value="50"></div>
-                        <div class="flex gap-2 items-center mb-4 bg-yellow-50 p-2 rounded">
-                            <input type="checkbox" id="p-aan" class="w-4 h-4" checked onchange="drawPondasi()">
-                            <label class="text-sm">Pakai Aanstamping</label>
+                        <div class="mb-4"><label class="text-xs text-slate-500 font-bold uppercase">Panjang Pondasi (m)</label><input type="number" id="p-p" class="w-full border-slate-300 focus:border-[#0f172a] focus:ring-1 focus:ring-[#0f172a]/20 p-2.5 rounded-lg mt-1 transition" value="50"></div>
+                        <div class="flex gap-2 items-center mb-4 bg-orange-50 p-3 rounded-lg border border-orange-100">
+                            <input type="checkbox" id="p-aan" class="w-5 h-5 accent-[#f59e0b]" checked onchange="drawPondasi()">
+                            <label class="text-sm font-medium text-slate-700">Pakai Aanstamping</label>
                         </div>
-                        <button onclick="hitungPondasi()" class="w-full bg-orange-500 text-white py-3 rounded-xl font-bold hover:bg-orange-600">Hitung RAB Pondasi</button>
+                        <button onclick="hitungPondasi()" class="w-full bg-[#f59e0b] hover:bg-amber-600 text-white py-3 rounded-xl font-bold shadow-md transition transform active:scale-95">🧮 Hitung RAB Pondasi</button>
                     </div>
-                    <div class="bg-slate-800 text-white p-4 rounded-xl text-sm">
-                        <h4 class="font-bold mb-2">Info Harga</h4>
-                        <div class="grid grid-cols-2 gap-2">
-                            <div>Batu: Rp <input type="number" id="hp-batu" value="250000" class="w-20 bg-transparent border-b border-slate-500 text-right text-xs"></div>
-                            <div>Semen: Rp <input type="number" id="hp-semen" value="65000" class="w-20 bg-transparent border-b border-slate-500 text-right text-xs"></div>
+
+                    <div class="bg-slate-800 text-white p-5 rounded-xl shadow-lg border border-slate-700">
+                        <h4 class="font-bold mb-3 text-amber-400">Info Harga Material</h4>
+                        <div class="grid grid-cols-2 gap-3 text-sm">
+                            <div>Batu: Rp <input type="number" id="hp-batu" value="250000" class="w-24 bg-slate-700 border-b border-slate-600 text-right text-xs p-1 rounded"></div>
+                            <div>Semen: Rp <input type="number" id="hp-semen" value="65000" class="w-24 bg-slate-700 border-b border-slate-600 text-right text-xs p-1 rounded"></div>
                         </div>
                     </div>
                 </div>
-                <div class="space-y-4">
-                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex justify-center items-center min-h-[200px]">
+
+                <div class="space-y-5">
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex justify-center items-center min-h-[220px]">
                         <div id="pondasi-svg-container"></div>
                     </div>
-                    <div class="bg-orange-50 p-4 rounded-xl border border-orange-100">
-                        <div class="flex justify-between mb-2"><span>Volume Pondasi:</span> <span class="font-bold" id="res-vol">-</span></div>
-                        <div class="flex justify-between mb-2"><span>Kebutuhan Batu:</span> <span class="font-bold" id="res-batu">-</span></div>
-                        <div class="flex justify-between mb-2"><span>Kebutuhan Semen:</span> <span class="font-bold" id="res-semen">-</span></div>
-                        <div class="flex justify-between pt-2 border-t mt-2 text-lg font-bold text-orange-800"><span>Total Biaya</span> <span id="res-total-pondasi">Rp 0</span></div>
+                    <div class="bg-orange-50 p-6 rounded-xl shadow-sm border border-orange-100">
+                        <h3 class="font-bold text-slate-800 mb-4">Analisa Volume & Biaya</h3>
+                        <div class="space-y-3 text-sm">
+                            <div class="flex justify-between items-center bg-white p-3 rounded-lg shadow-sm">
+                                <span class="text-slate-600 font-medium">Volume Pondasi</span>
+                                <span class="font-bold text-slate-800" id="res-vol">-</span>
+                            </div>
+                            <div class="flex justify-between items-center bg-white p-3 rounded-lg shadow-sm">
+                                <span class="text-slate-600 font-medium">Kebutuhan Batu</span>
+                                <span class="font-bold text-slate-800" id="res-batu">-</span>
+                            </div>
+                            <div class="flex justify-between items-center bg-white p-3 rounded-lg shadow-sm">
+                                <span class="text-slate-600 font-medium">Kebutuhan Semen</span>
+                                <span class="font-bold text-slate-800" id="res-semen">-</span>
+                            </div>
+                            <div class="flex justify-between items-center pt-4 mt-2 border-t border-orange-200 text-lg">
+                                <span class="font-bold text-orange-800">Total Biaya</span>
+                                <span class="font-bold text-orange-800" id="res-total-pondasi">Rp 0</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- 6. MENU BLOG BARU -->
+        <!-- 6. MENU BLOG -->
         <section id="blog" class="tab-content">
-            <div class="bg-white rounded-xl shadow-sm p-6 border border-slate-100 min-h-[500px]">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="font-bold text-lg text-blue-600">📰 Artikel Sipil Terbaru</h3>
-                    <a href="https://alister10.blogspot.com" target="_blank" class="text-sm bg-blue-100 text-blue-700 px-3 py-1 rounded-full hover:bg-blue-200 transition">Kunjungi Blog &rarr;</a>
+            <div class="bg-white p-8 rounded-xl shadow-sm border border-slate-200 min-h-[500px]">
+                <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+                    <div>
+                        <h3 class="font-bold text-xl text-slate-800 flex items-center gap-2">
+                            📰 Artikel Teknik Sipil
+                        </h3>
+                        <p class="text-slate-500 text-sm">Wawasan terbaru dari Alister Engineering</p>
+                    </div>
+                    <a href="https://alister10.blogspot.com" target="_blank" class="bg-[#0f172a] text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-slate-800 transition shadow-md flex items-center gap-2">
+                        Kunjungi Blog Resmi <span>&rarr;</span>
+                    </a>
                 </div>
                 
                 <div id="blog-loading" class="text-center py-10 text-slate-500">
                     <div class="animate-spin inline-block w-8 h-8 border-4 border-current border-t-transparent rounded-full"></div>
-                    <p class="mt-2">Memuat artikel dari Alister Engineering...</p>
+                    <p class="mt-2">Memuat artikel terbaru...</p>
                 </div>
 
-                <div id="blog-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 hidden">
-                    <!-- Artikel akan muncul di sini via JS -->
-                </div>
+                <div id="blog-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 hidden"></div>
 
                 <div id="blog-error" class="hidden text-center py-10 bg-red-50 rounded-lg border border-red-100">
-                    <p class="text-red-600">Gagal memuat artikel. Pastikan Anda terhubung ke internet.</p>
+                    <p class="text-red-600 font-medium">Gagal memuat artikel. Periksa koneksi internet Anda.</p>
                 </div>
             </div>
         </section>
 
     </main>
 
-    <!-- FOOTER BOTTOM NAVIGATION -->
-    <nav id="bottom-nav" class="fixed bottom-0 left-0 w-full bg-white border-t border-slate-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-50 no-print">
-        <div class="max-w-7xl mx-auto grid grid-cols-6 h-16">
-            
-            <!-- Dashboard -->
-            <button onclick="switchTab('dashboard')" class="nav-btn-bottom active flex flex-col items-center justify-center text-slate-400 hover:text-blue-600 transition-colors">
-                <span class="text-lg mb-1">📊</span>
-                <span class="text-[10px] font-medium">Home</span>
+    <!-- FOOTER BOTTOM NAVIGATION (DARK THEME) -->
+    <nav id="bottom-nav" class="fixed bottom-0 left-0 w-full bg-[#0f172a] border-t border-slate-700 shadow-[0_-4px_20px_rgba(15,23,42,0.4)] z-50 no-print">
+        <div class="max-w-7xl mx-auto grid grid-cols-6 h-[70px]">
+            <button onclick="switchTab('dashboard')" class="nav-btn-bottom active flex flex-col items-center justify-center text-slate-500 hover:text-white transition-all relative group">
+                <span class="text-lg mb-1 group-hover:scale-110 transition-transform">📊</span>
+                <span class="text-[10px] font-medium tracking-wide">Home</span>
+                <div class="absolute top-0 w-full h-[3px] bg-[#f59e0b] rounded-b-md scale-x-0 group-hover:scale-x-100 transition-transform origin-center"></div>
             </button>
-
-            <!-- Denah -->
-            <button onclick="switchTab('denah')" class="nav-btn-bottom flex flex-col items-center justify-center text-slate-400 hover:text-blue-600 transition-colors">
-                <span class="text-lg mb-1">📐</span>
-                <span class="text-[10px] font-medium">Denah</span>
+            <button onclick="switchTab('denah')" class="nav-btn-bottom flex flex-col items-center justify-center text-slate-500 hover:text-white transition-all relative group">
+                <span class="text-lg mb-1 group-hover:scale-110 transition-transform">📐</span>
+                <span class="text-[10px] font-medium tracking-wide">Denah</span>
+                <div class="absolute top-0 w-full h-[3px] bg-[#f59e0b] rounded-b-md scale-x-0 group-hover:scale-x-100 transition-transform origin-center"></div>
             </button>
-
-            <!-- Listrik -->
-            <button onclick="switchTab('listrik')" class="nav-btn-bottom flex flex-col items-center justify-center text-slate-400 hover:text-blue-600 transition-colors">
-                <span class="text-lg mb-1">⚡</span>
-                <span class="text-[10px] font-medium">Listrik</span>
+            <button onclick="switchTab('listrik')" class="nav-btn-bottom flex flex-col items-center justify-center text-slate-500 hover:text-white transition-all relative group">
+                <span class="text-lg mb-1 group-hover:scale-110 transition-transform">⚡</span>
+                <span class="text-[10px] font-medium tracking-wide">Listrik</span>
+                <div class="absolute top-0 w-full h-[3px] bg-[#f59e0b] rounded-b-md scale-x-0 group-hover:scale-x-100 transition-transform origin-center"></div>
             </button>
-
-            <!-- Bangunan -->
-            <button onclick="switchTab('bangunan')" class="nav-btn-bottom flex flex-col items-center justify-center text-slate-400 hover:text-blue-600 transition-colors">
-                <span class="text-lg mb-1">🏗️</span>
-                <span class="text-[10px] font-medium">Bangunan</span>
+            <button onclick="switchTab('bangunan')" class="nav-btn-bottom flex flex-col items-center justify-center text-slate-500 hover:text-white transition-all relative group">
+                <span class="text-lg mb-1 group-hover:scale-110 transition-transform">🏗️</span>
+                <span class="text-[10px] font-medium tracking-wide">Bangunan</span>
+                <div class="absolute top-0 w-full h-[3px] bg-[#f59e0b] rounded-b-md scale-x-0 group-hover:scale-x-100 transition-transform origin-center"></div>
             </button>
-
-            <!-- Pondasi -->
-            <button onclick="switchTab('pondasi')" class="nav-btn-bottom flex flex-col items-center justify-center text-slate-400 hover:text-blue-600 transition-colors">
-                <span class="text-lg mb-1">🪨</span>
-                <span class="text-[10px] font-medium">Pondasi</span>
+            <button onclick="switchTab('pondasi')" class="nav-btn-bottom flex flex-col items-center justify-center text-slate-500 hover:text-white transition-all relative group">
+                <span class="text-lg mb-1 group-hover:scale-110 transition-transform">🪨</span>
+                <span class="text-[10px] font-medium tracking-wide">Pondasi</span>
+                <div class="absolute top-0 w-full h-[3px] bg-[#f59e0b] rounded-b-md scale-x-0 group-hover:scale-x-100 transition-transform origin-center"></div>
             </button>
-
-            <!-- Blog -->
-            <button onclick="switchTab('blog')" class="nav-btn-bottom flex flex-col items-center justify-center text-slate-400 hover:text-blue-600 transition-colors">
-                <span class="text-lg mb-1">📰</span>
-                <span class="text-[10px] font-medium">Blog</span>
+            <button onclick="switchTab('blog')" class="nav-btn-bottom flex flex-col items-center justify-center text-slate-500 hover:text-white transition-all relative group">
+                <span class="text-lg mb-1 group-hover:scale-110 transition-transform">📰</span>
+                <span class="text-[10px] font-medium tracking-wide">Blog</span>
+                <div class="absolute top-0 w-full h-[3px] bg-[#f59e0b] rounded-b-md scale-x-0 group-hover:scale-x-100 transition-transform origin-center"></div>
             </button>
-
         </div>
     </nav>
 
