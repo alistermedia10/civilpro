@@ -1,0 +1,24 @@
+{
+  "name": "CivilPro - Aplikasi Sipil",
+  "short_name": "CivilPro",
+  "description": "Aplikasi Kalkulator Sipil Terpadu (Denah, RAB, Listrik, Pondasi)",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f1f5f9",
+  "theme_color": "#2563eb",
+  "orientation": "portrait",
+  "scope": "./",
+  "icons": [
+    {
+      "src": "https://picsum.photos/seed/civilpro192/192/192",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://picsum.photos/seed/civilpro512/512/512",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
