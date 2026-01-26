@@ -1,10 +1,10 @@
 {
-  "name": "Alister Engineering - Pro",
+  "name": "Alister Engineering - Ultimate",
   "short_name": "Alister Eng",
-  "description": "Sistem Perhitungan Struktur & Estimasi Biaya Pro (Denah, RAB, Listrik)",
+  "description": "Aplikasi Sipil Pro dengan Blog & Kategori",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#0f172a",
+  "background_color": "#f1f5f9",
   "theme_color": "#0f172a",
   "orientation": "portrait",
   "scope": "./",
