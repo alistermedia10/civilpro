@@ -320,33 +320,49 @@
         </section>
 
         <!-- 6. MENU BLOG -->
-        <section id="blog" class="tab-content">
-            <div class="bg-white p-8 rounded-xl shadow-sm border border-slate-200 min-h-[500px]">
-                <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-                    <div>
-                        <h3 class="font-bold text-xl text-slate-800 flex items-center gap-2">
-                            📰 Artikel Teknik Sipil
-                        </h3>
-                        <p class="text-slate-500 text-sm">Wawasan terbaru dari Alister Engineering</p>
-                    </div>
-                    <a href="https://alister10.blogspot.com" target="_blank" class="bg-[#0f172a] text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-slate-800 transition shadow-md flex items-center gap-2">
-                        Kunjungi Blog Resmi <span>&rarr;</span>
-                    </a>
-                </div>
-                
-                <div id="blog-loading" class="text-center py-10 text-slate-500">
-                    <div class="animate-spin inline-block w-8 h-8 border-4 border-current border-t-transparent rounded-full"></div>
-                    <p class="mt-2">Memuat artikel terbaru...</p>
-                </div>
+        <!-- 6. MENU BLOG -->
+<section id="blog" class="tab-content hidden">
+    <div class="bg-white p-8 rounded-xl shadow-sm border border-slate-200 min-h-[500px]">
 
-                <div id="blog-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 hidden"></div>
-
-                <div id="blog-error" class="hidden text-center py-10 bg-red-50 rounded-lg border border-red-100">
-                    <p class="text-red-600 font-medium">Gagal memuat artikel. Periksa koneksi internet Anda.</p>
-                </div>
+        <!-- HEADER -->
+        <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+            <div>
+                <h3 class="font-bold text-xl text-slate-800 flex items-center gap-2">
+                    📰 Artikel Teknik Sipil
+                </h3>
+                <p class="text-slate-500 text-sm">
+                    Wawasan terbaru dari Alister Engineering
+                </p>
             </div>
-       
 
+            <a href="https://alister10.blogspot.com" target="_blank"
+               class="bg-[#0f172a] text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-slate-800 transition shadow-md flex items-center gap-2">
+                Kunjungi Blog Resmi <span>&rarr;</span>
+            </a>
+        </div>
+
+        <!-- LOADING (DICARI JS) -->
+        <div id="blog-loading" class="text-center py-10 text-slate-500 hidden">
+            <div class="animate-spin inline-block w-8 h-8 border-4 border-current border-t-transparent rounded-full"></div>
+            <p class="mt-2">Memuat artikel terbaru...</p>
+        </div>
+
+        <!-- CONTAINER ARTIKEL (TARGET UTAMA JS) -->
+        <div
+            id="blog-container"
+            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 hidden">
+        </div>
+
+        <!-- ERROR STATE (DICARI JS) -->
+        <div
+            id="blog-error"
+            class="hidden text-center py-10 bg-red-50 rounded-lg border border-red-100">
+            <p class="text-red-600 font-medium">
+                Gagal memuat artikel. Periksa koneksi internet Anda.
+            </p>
+        </div>
+
+    </div>
 </section>
 <!-- SCRIPT UNTUK MEMUAT ARTIKEL BLOG -->
 
