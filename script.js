@@ -85,7 +85,7 @@ async function loadBlog() {
 
     try {
         // Fetch Feed
-        const response = await fetch('https://alister10.blogspot.com/feeds/posts/default?alt=json&max-results=9');
+        const response = await fetch('https://alister10.blogspot.com/feeds/posts/default');
         
         if (!response.ok) throw new Error('Network Error');
         
@@ -111,7 +111,7 @@ async function loadBlog() {
                     categoryLabel = post.category[0].term;
                     // Warna berdasarkan kategori (Custom mapping sederhana)
                     const catLower = categoryLabel.toLowerCase();
-                    if(catLower.includes('listrik') || catLower.includes('teknik')) categoryColor = "bg-yellow-100 text-yellow-800 border-yellow-200";
+                    if(catLower.includes('Kelistrikan') || catLower.includes('teknik')) categoryColor = "bg-yellow-100 text-yellow-800 border-yellow-200";
                     else if(catLower.includes('struktur') || catLower.includes('pondasi')) categoryColor = "bg-blue-100 text-blue-800 border-blue-200";
                     else if(catLower.includes('cat') || catLower.includes('finishing')) categoryColor = "bg-pink-100 text-pink-800 border-pink-200";
                     else if(catLower.includes('tips') || catLower.includes('tutorial')) categoryColor = "bg-green-100 text-green-800 border-green-200";
@@ -119,8 +119,8 @@ async function loadBlog() {
                 // 2. Jika tidak ada label, tebak dari judul (Fallback)
                 else {
                     const t = title.toLowerCase();
-                    if(t.includes('listrik') || t.includes('instalasi')) {
-                        categoryLabel = "Teknik Listrik";
+                    if(t.includes('Kelistrikan') || t.includes('instalasi')) {
+                        categoryLabel = "Kelistrikan";
                         categoryColor = "bg-yellow-100 text-yellow-800 border-yellow-200";
                     } else if(t.includes('pondasi') || t.includes('pond')) {
                         categoryLabel = "Sipil Struktur";
