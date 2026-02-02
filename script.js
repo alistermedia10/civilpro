@@ -5,7 +5,8 @@ function parseRupiah(str) {
     return parseInt(str.replace(/[^0-9]/g, '')) || 0;
 }
 
-const blogUrl = 'https://alister10.blogspot.com/feeds/posts/default?alt=json';
+    
+const blogUrl = 'https://alister10.blogspot.com/feeds/posts/default';
 
 async function loadBlogPosts() {
     const loading = document.getElementById('blog-loading');
